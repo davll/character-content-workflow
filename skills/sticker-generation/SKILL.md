@@ -23,7 +23,14 @@ Run the sticker workflow directly in this skill. Use the `character-registry` sk
 
 ## Registry Lookup
 
-Do not parse `characters/index.yaml` manually for sheet search or prompt-building data. Use the `character-registry` skill for validation, registry listing, sheet path resolution, and prompt-building data.
+Resolve the registry path before calling `character-registry`:
+
+1. Use an explicit user-provided registry path when supplied.
+2. Otherwise use `characters/index.yaml` when it exists.
+3. Otherwise, when running inside this skill development repository, use `examples/characters/index.yaml` when it exists.
+4. Create `characters/index.yaml` through the `character-registry` first-use workflow only when no usable registry candidate exists.
+
+Do not parse the selected registry YAML manually for sheet search or prompt-building data. Use the `character-registry` skill for validation, registry listing, sheet path resolution, and prompt-building data.
 
 Treat character-registry failures as workflow failures. Report the error and stop before writing image outputs. If the registry path is overridden, pass that path through every registry lookup.
 

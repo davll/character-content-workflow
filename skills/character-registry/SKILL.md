@@ -26,6 +26,8 @@ npm run build:character-registry-skill
 
 If the registry file does not exist, create it as part of this skill workflow before calling downstream sticker, illustration, or image-generation skills.
 
+Downstream generation skills should resolve their registry candidate path before invoking this first-use flow. In this skill development repository, they should prefer an existing `examples/characters/index.yaml` fixture over creating a duplicate root registry when `characters/index.yaml` is absent.
+
 1. Infer initial registry data from the user's prompt:
    - `characters`: character IDs, display names, aliases, and durable visual/personality characteristics.
    - `groups`: single-character or multi-character groups that the user is asking to use together.
