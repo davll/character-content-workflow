@@ -11,6 +11,10 @@ This repository includes four skills:
 - `illustration-generation`: Create character-consistent illustrations from registered character sheets and optional reference images.
 - `sticker-generation`: Create chat-style stickers, LINE/Telegram-style stickers, reaction stickers, chibi stickers, or sticker sheets from registered characters.
 
+## Recommended Skills
+
+- **brainstorming:** `npx skills add https://github.com/obra/superpowers --skill brainstorming`
+
 ## Install
 
 ### Install in a Project
