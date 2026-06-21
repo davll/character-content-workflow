@@ -1,0 +1,7 @@
+node_modules/
+dist/
+*.tsbuildinfo
+tmp/
+output/
+easy-image-gen.exe
+easy-image-gen

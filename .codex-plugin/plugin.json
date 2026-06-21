@@ -1,0 +1,34 @@
+{
+  "name": "character-content-workflow",
+  "version": "1.0.0",
+  "description": "Skills and tools for character registries, image generation, illustrations, and sticker workflows.",
+  "author": {
+    "name": "davll"
+  },
+  "license": "MIT",
+  "keywords": [
+    "characters",
+    "image-generation",
+    "illustration",
+    "stickers",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Character Content Workflow",
+    "shortDescription": "Character registry and content generation workflows.",
+    "longDescription": "Provides Codex skills for querying character registries, generating images, creating illustrations, and producing stickers with consistent character references.",
+    "developerName": "davll",
+    "category": "Productivity",
+    "capabilities": [
+      "Write",
+      "Interactive"
+    ],
+    "defaultPrompt": [
+      "Validate my character registry.",
+      "Generate art from a character sheet.",
+      "Create stickers for a character."
+    ],
+    "brandColor": "#2563EB"
+  }
+}

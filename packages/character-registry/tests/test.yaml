@@ -1,0 +1,23 @@
+---
+characters:
+  mike:
+    names:
+      - Mikhail Oryol
+      - Михаил Орёл
+      - ミハイル・オリョール
+      - 米哈伊爾・奧廖爾
+  hiroshi:
+    names:
+      - Hiroshi Amano
+      - 天野宏
+      - あまの ひろし
+groups:
+  mike_and_hiroshi:
+    characters: [mike, hiroshi]
+    sheets:
+      base:
+        path: groups/mike_and_hiroshi/sheets/base/mike_x_hiroshi-base.png
+        description: Base version
+      navy_uniform:
+        path: groups/mike_and_hiroshi/sheets/outfits/mike_and_hiroshi-navy_uniform.png
+        description: Navy uniform version

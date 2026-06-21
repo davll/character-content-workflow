@@ -1,0 +1,4 @@
+interface:
+  display_name: "Illustration Generation"
+  short_description: "Generate character-consistent illustrations."
+  default_prompt: "Generate an illustration using registered character sheets and hand off rendering to image-generation."

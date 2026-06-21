@@ -1,0 +1,77 @@
+---
+name: image-generation
+description: Generate or edit images with the bundled repository-local generate-image CLI. Use when Codex needs direct text-to-image generation, image editing from JPEG/PNG references, provider model listing, image generation dry runs, or another workflow needs a stable image-generation command. Supports OpenAI and xAI providers through environment-variable API keys.
+---
+# Image Generation
+
+Use the bundled single-file CLI from the workspace root:
+
+```powershell
+node scripts/generate-image.mjs <command> [options]
+```
+
+The TypeScript source workspace lives at `ts/`, and the CLI source package is `ts/packages/generate-image/`. If the source changes, rebuild the bundled skill scripts with:
+
+```powershell
+npm --prefix ts run build:skill
+```
+
+## Generate
+
+Prefer prompt files for non-trivial prompts:
+
+```powershell
+node scripts/generate-image.mjs gen `
+  --provider openai `
+  --prompt-file path/to/prompt.txt `
+  --output path/to/output.png
+```
+
+For a short prompt, inline text is allowed:
+
+```powershell
+node scripts/generate-image.mjs gen --provider openai --prompt-text "Prompt text" --output path/to/output.png
+```
+
+Use reference images for image-to-image or editing workflows. References must be JPEG or PNG, and their order is the order described in the prompt as `1st image`, `2nd image`, etc.
+
+```powershell
+node scripts/generate-image.mjs gen `
+  --provider openai `
+  --reference path/to/ref1.png path/to/ref2.jpg `
+  --prompt-file path/to/prompt.txt `
+  --output path/to/output.png
+```
+
+Use `--provider xai` for xAI image generation/editing. xAI defaults to `XAI_API_KEY`; OpenAI defaults to `OPENAI_API_KEY`.
+
+## Arguments
+
+- `--output` / `-o`: required output image path. The CLI creates the output directory.
+- `--prompt-file <path>` or `--prompt-text <text>`: one is required.
+- `--provider` / `-p`: `openai` or `xai`. Default is `openai`.
+- `--model` / `-m`: optional. Defaults are `gpt-image-2` for OpenAI and `grok-imagine-image-quality` for xAI.
+- `--reference` / `-r <paths...>`: ordered JPEG/PNG reference images.
+- `--count` / `-c <number>`: optional number of images. When count is greater than 1, extra files are saved with numeric suffixes.
+- `--size`, `--quality`, `--aspect-ratio`, `--resolution`, `--moderation`: pass only when the user or upstream workflow needs them. `--moderation` is OpenAI-only.
+- `--api-key-env <name>`: environment variable that contains the provider API key.
+- `--dry-run`: validate inputs and report requested output paths without calling the provider.
+- `--verbose`: print progress logs.
+- `--force` / `-f`: overwrite existing outputs.
+
+## Model Listing
+
+```powershell
+node scripts/generate-image.mjs models --provider openai
+node scripts/generate-image.mjs models --provider xai
+```
+
+## Rules
+
+1. Run the bundled `.mjs` with `node` from the active workspace root so relative input/output paths resolve against the user's current project.
+2. Always pass an explicit output path.
+3. Prefer `--prompt-file` when the prompt includes reference guides, long constraints, or user-provided text.
+4. Use API keys only through environment variables and `--api-key-env`; do not add key-file flags.
+5. Use `--dry-run` before expensive or risky calls when validating command shape.
+6. Use `--force` only when the user asks to overwrite or when regenerating a known disposable artifact.
+7. Do not call the old `easy-image-gen` package or use `npm run -w` for skill execution.

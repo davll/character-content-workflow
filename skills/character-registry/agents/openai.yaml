@@ -1,0 +1,4 @@
+interface:
+  display_name: "Character Registry"
+  short_description: "Query and validate registered character sheets."
+  default_prompt: "Validate the character registry and inspect available character sheets."

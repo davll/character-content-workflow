@@ -1,0 +1,26 @@
+{
+  "name": "@davll/easy-ai-runtime",
+  "version": "1.0.0",
+  "description": "Shared AI provider auth, image generation, and structured text helpers",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "tsx --test tests/*.test.ts",
+    "test:integration": "npm run test:integration:text && npm run test:integration:image",
+    "test:integration:image": "tsx tests/integration/image.integration.test.ts",
+    "test:integration:text": "tsx tests/integration/text.integration.test.ts"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.42",
+    "commander": "^15.0.0",
+    "tsx": "^4.22.4",
+    "typescript": "^5.4.5"
+  }
+}

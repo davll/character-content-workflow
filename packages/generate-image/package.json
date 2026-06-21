@@ -1,0 +1,23 @@
+{
+  "name": "@davll/generate-image",
+  "version": "1.0.0",
+  "description": "Repository-local image generation CLI for OpenAI and xAI",
+  "bin": {
+    "generate-image": "src/main.ts"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "gen": "node --experimental-strip-types src/main.ts",
+    "gen:dev": "tsx src/main.ts"
+  },
+  "dependencies": {
+    "@davll/easy-ai-runtime": "file:../easy-ai-runtime",
+    "commander": "^15.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.42",
+    "tsx": "^4.22.4",
+    "typescript": "^5.4.5"
+  }
+}

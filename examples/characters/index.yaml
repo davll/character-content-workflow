@@ -1,0 +1,20 @@
+---
+characters:
+  mike:
+    names:
+      - Mikhail Oryol
+      - Михаил Орёл
+      - ミハイル・オリョール
+      - 米哈伊爾・奧廖爾
+  hiroshi:
+    names:
+      - Hiroshi Amano
+      - 天野宏
+      - あまの ひろし
+groups:
+  mike_and_hiroshi:
+    characters: [mike, hiroshi]
+    sheets:
+      navy_uniform:
+        path: sheets/mike_x_hiroshi-navy_uniforms.png
+        description: Character sheet for Mikhail Oryol and Hiroshi Amano, they are wearing navy uniforms.
