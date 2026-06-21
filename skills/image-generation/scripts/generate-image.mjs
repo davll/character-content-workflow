@@ -3709,7 +3709,7 @@ async function loadReferenceImages(referenceImagePaths) {
     const data = await fs2.readFile(imagePath);
     const mimeType = sniffImageMimeType(data);
     if (!mimeType) {
-      throw new Error(`Unsupported reference image format: ${imagePath}. Only JPEG and PNG are supported.`);
+      throw new Error(`Unsupported reference image format: ${imagePath}. Only JPEG, PNG, and WebP are supported.`);
     }
     references.push({
       name: path2.basename(imagePath),
@@ -3742,6 +3742,9 @@ function sniffImageMimeType(data) {
   if (data[0] === 255 && data[1] === 216) return "image/jpeg";
   if (data[0] === 137 && data[1] === 80 && data[2] === 78 && data[3] === 71) {
     return "image/png";
+  }
+  if (data.length >= 12 && data[0] === 82 && data[1] === 73 && data[2] === 70 && data[3] === 70 && data[8] === 87 && data[9] === 69 && data[10] === 66 && data[11] === 80) {
+    return "image/webp";
   }
   return null;
 }

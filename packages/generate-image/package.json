@@ -8,6 +8,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
+    "test": "tsx --test tests/*.test.ts",
     "gen": "node --experimental-strip-types src/main.ts",
     "gen:dev": "tsx src/main.ts"
   },

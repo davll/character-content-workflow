@@ -1,6 +1,6 @@
 ---
 name: image-generation
-description: Generate or edit images with the bundled repository-local generate-image CLI. Use when Codex needs direct text-to-image generation, image editing from JPEG/PNG references, provider model listing, image generation dry runs, or another workflow needs a stable image-generation command. Supports OpenAI and xAI providers through environment-variable API keys.
+description: Generate or edit images with the bundled repository-local generate-image CLI. Use when Codex needs direct text-to-image generation, image editing from JPEG/PNG/WebP references, provider model listing, image generation dry runs, or another workflow needs a stable image-generation command. Supports OpenAI and xAI providers through environment-variable API keys.
 ---
 # Image Generation
 
@@ -33,7 +33,7 @@ For a short prompt, inline text is allowed:
 node skills/image-generation/scripts/generate-image.mjs gen --provider openai --prompt-text "Prompt text" --output path/to/output.png
 ```
 
-Use reference images for image-to-image or editing workflows. References must be JPEG or PNG, and their order is the order described in the prompt as `1st image`, `2nd image`, etc.
+Use reference images for image-to-image or editing workflows. References must be JPEG, PNG, or WebP, and their order is the order described in the prompt as `1st image`, `2nd image`, etc.
 
 ```powershell
 node skills/image-generation/scripts/generate-image.mjs gen `
@@ -51,7 +51,7 @@ Use `--provider xai` for xAI image generation/editing. xAI defaults to `XAI_API_
 - `--prompt-file <path>` or `--prompt-text <text>`: one is required.
 - `--provider` / `-p`: `openai` or `xai`. Default is `openai`.
 - `--model` / `-m`: optional. Defaults are `gpt-image-2` for OpenAI and `grok-imagine-image-quality` for xAI.
-- `--reference` / `-r <paths...>`: ordered JPEG/PNG reference images.
+- `--reference` / `-r <paths...>`: ordered JPEG/PNG/WebP reference images.
 - `--count` / `-c <number>`: optional number of images. When count is greater than 1, extra files are saved with numeric suffixes.
 - `--size`, `--quality`, `--aspect-ratio`, `--resolution`, `--moderation`: pass only when the user or upstream workflow needs them. `--moderation` is OpenAI-only.
 - `--api-key-env <name>`: environment variable that contains the provider API key.
