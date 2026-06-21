@@ -18,6 +18,11 @@ npm --prefix ts run build:skill
 
 ## Generate
 
+Image provider calls can legitimately run for several minutes. When invoking
+`gen` through a shell tool, set the shell timeout to 10 minutes
+(`timeout_ms: 600000`) so slow image generation is not misclassified as a
+timeout and aborted.
+
 Prefer prompt files for non-trivial prompts:
 
 ```powershell
