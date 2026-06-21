@@ -28,6 +28,8 @@ If the registry file does not exist, create it as part of this skill workflow be
 
 Downstream generation skills should resolve their registry candidate path before invoking this first-use flow. In this skill development repository, they should prefer an existing `examples/characters/index.yaml` fixture over creating a duplicate root registry when `characters/index.yaml` is absent.
 
+Before creating or modifying registry YAML, read `references/registry_schema.md` for the registry structure, field responsibilities, and safe inference rules. Use that reference when adding characters, groups, sheets, or prompt-building data from user requests or known workspace files.
+
 1. Infer initial registry data from the user's prompt:
    - `characters`: character IDs, display names, aliases, and durable visual/personality characteristics.
    - `groups`: single-character or multi-character groups that the user is asking to use together.
@@ -111,3 +113,4 @@ node skills/character-registry/scripts/character-registry.mjs get-sheet-info --f
 5. Use `get-sheet-info` for prompt-building data, including sheet description, `prompt_building.segments`, `prompt_building.constraints`, and `prompt_building.system_instructions`.
 6. Treat non-zero CLI exits as workflow failures. Report the command error and stop before generating images.
 7. If the user provides a custom registry path, pass that same `--file` value to every command in the workflow.
+8. When asked to create, repair, or modify registry YAML, read `references/registry_schema.md` before editing and validate the registry immediately after writing.
