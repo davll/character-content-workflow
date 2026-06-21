@@ -115,37 +115,37 @@ After installing the skills, you can ask Codex things like:
 
 Install dependencies:
 
-```powershell
+```shell
 npm install
 ```
 
 Build packages:
 
-```powershell
+```shell
 npm run build
 ```
 
 Run tests:
 
-```powershell
+```shell
 npm test
 ```
 
 Rebuild bundled skill scripts after changing source packages:
 
-```powershell
+```shell
 npm run build:skill
 ```
 
 You can also rebuild specific bundled skill scripts:
 
-```powershell
+```shell
 npm run build:generate-image-skill
 npm run build:character-registry-skill
 ```
 
 Sync built skills into `.agents/skills/` for local testing:
 
-```powershell
+```shell
 npm run sync:agents-skills
 ```

@@ -6,13 +6,13 @@ description: Generate or edit images with the bundled repository-local generate-
 
 Use the bundled single-file CLI from the workspace root:
 
-```powershell
+```shell
 node skills/image-generation/scripts/generate-image.mjs <command> [options]
 ```
 
 The TypeScript source workspace lives at `ts/`, and the CLI source package is `ts/packages/generate-image/`. If the source changes, rebuild the bundled skill scripts with:
 
-```powershell
+```shell
 npm --prefix ts run build:skill
 ```
 
@@ -25,7 +25,7 @@ timeout and aborted.
 
 Prefer prompt files for non-trivial prompts:
 
-```powershell
+```shell
 node skills/image-generation/scripts/generate-image.mjs gen `
   --provider openai `
   --prompt-file path/to/prompt.txt `
@@ -34,13 +34,13 @@ node skills/image-generation/scripts/generate-image.mjs gen `
 
 For a short prompt, inline text is allowed:
 
-```powershell
+```shell
 node skills/image-generation/scripts/generate-image.mjs gen --provider openai --prompt-text "Prompt text" --output path/to/output.png
 ```
 
 Use reference images for image-to-image or editing workflows. References must be JPEG, PNG, or WebP, and their order is the order described in the prompt as `1st image`, `2nd image`, etc.
 
-```powershell
+```shell
 node skills/image-generation/scripts/generate-image.mjs gen `
   --provider openai `
   --reference path/to/ref1.png path/to/ref2.jpg `
@@ -66,7 +66,7 @@ Use `--provider xai` for xAI image generation/editing. xAI defaults to `XAI_API_
 
 ## Model Listing
 
-```powershell
+```shell
 node skills/image-generation/scripts/generate-image.mjs models --provider openai
 node skills/image-generation/scripts/generate-image.mjs models --provider xai
 ```

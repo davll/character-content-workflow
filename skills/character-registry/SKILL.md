@@ -6,13 +6,13 @@ description: Query and validate repository character registry data with the bund
 
 Use the bundled single-file CLI from the workspace root:
 
-```powershell
+```shell
 node skills/character-registry/scripts/character-registry.mjs <command> [options]
 ```
 
 The TypeScript source package lives at `packages/character-registry/`. If the source changes, rebuild the bundled skill script from the workspace root with:
 
-```powershell
+```shell
 npm run build:character-registry-skill
 ```
 
@@ -80,25 +80,25 @@ groups:
 
 Validate the registry:
 
-```powershell
+```shell
 node skills/character-registry/scripts/character-registry.mjs validate --file characters/index.yaml
 ```
 
 List searchable character, group, and sheet summaries for inference:
 
-```powershell
+```shell
 node skills/character-registry/scripts/character-registry.mjs list-all --file characters/index.yaml
 ```
 
 Resolve a selected sheet image path:
 
-```powershell
+```shell
 node skills/character-registry/scripts/character-registry.mjs get-sheet-path --file characters/index.yaml <group_id> <sheet_id>
 ```
 
 Load prompt-building data for a selected sheet:
 
-```powershell
+```shell
 node skills/character-registry/scripts/character-registry.mjs get-sheet-info --file characters/index.yaml <group_id> <sheet_id>
 ```
 
