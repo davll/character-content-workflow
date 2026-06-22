@@ -4,10 +4,13 @@ description: Query and validate repository character registry data with the bund
 ---
 # Character Registry
 
-Use the bundled single-file CLI from the workspace root:
+Use the bundled single-file CLI from this skill's own directory. Resolve the
+script path relative to this `SKILL.md`, not relative to the user's workspace
+root. Run the command with the active workspace root as the shell working
+directory so registry and sheet paths still resolve against the user's project:
 
 ```shell
-node skills/character-registry/scripts/character-registry.mjs <command> [options]
+node <this-skill-directory>/scripts/character-registry.mjs <command> [options]
 ```
 
 The TypeScript source package lives at `packages/character-registry/`. If the source changes, rebuild the bundled skill script from the workspace root with:
@@ -83,30 +86,30 @@ groups:
 Validate the registry:
 
 ```shell
-node skills/character-registry/scripts/character-registry.mjs validate --file characters/index.yaml
+node <this-skill-directory>/scripts/character-registry.mjs validate --file characters/index.yaml
 ```
 
 List searchable character, group, and sheet summaries for inference:
 
 ```shell
-node skills/character-registry/scripts/character-registry.mjs list-all --file characters/index.yaml
+node <this-skill-directory>/scripts/character-registry.mjs list-all --file characters/index.yaml
 ```
 
 Resolve a selected sheet image path:
 
 ```shell
-node skills/character-registry/scripts/character-registry.mjs get-sheet-path --file characters/index.yaml <group_id> <sheet_id>
+node <this-skill-directory>/scripts/character-registry.mjs get-sheet-path --file characters/index.yaml <group_id> <sheet_id>
 ```
 
 Load prompt-building data for a selected sheet:
 
 ```shell
-node skills/character-registry/scripts/character-registry.mjs get-sheet-info --file characters/index.yaml <group_id> <sheet_id>
+node <this-skill-directory>/scripts/character-registry.mjs get-sheet-info --file characters/index.yaml <group_id> <sheet_id>
 ```
 
 ## Rules
 
-1. Run the bundled `.mjs` with `node` from the active workspace root so relative registry and sheet paths resolve against the user's project.
+1. Resolve the bundled `.mjs` path from this skill directory. Use the active workspace root as the shell working directory so relative registry and sheet paths resolve against the user's project.
 2. Validate the registry before using sheet IDs in sticker, illustration, or image workflows.
 3. Use `list-all` for character/group/sheet selection instead of parsing `characters/index.yaml` manually.
 4. Use `get-sheet-path` for reference image paths passed to image-generation workflows.

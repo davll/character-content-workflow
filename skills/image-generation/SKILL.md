@@ -4,10 +4,13 @@ description: Generate or edit images with the bundled repository-local generate-
 ---
 # Image Generation
 
-Use the bundled single-file CLI from the workspace root:
+Use the bundled single-file CLI from this skill's own directory. Resolve the
+script path relative to this `SKILL.md`, not relative to the user's workspace
+root. Run the command with the active workspace root as the shell working
+directory so input and output paths still resolve against the user's project:
 
 ```shell
-node skills/image-generation/scripts/generate-image.mjs <command> [options]
+node <this-skill-directory>/scripts/generate-image.mjs <command> [options]
 ```
 
 The TypeScript source workspace lives at `ts/`, and the CLI source package is `ts/packages/generate-image/`. If the source changes, rebuild the bundled skill scripts with:
@@ -26,7 +29,7 @@ timeout and aborted.
 Prefer prompt files for non-trivial prompts:
 
 ```shell
-node skills/image-generation/scripts/generate-image.mjs gen `
+node <this-skill-directory>/scripts/generate-image.mjs gen `
   --provider openai `
   --prompt-file path/to/prompt.txt `
   --output path/to/output.png
@@ -35,13 +38,13 @@ node skills/image-generation/scripts/generate-image.mjs gen `
 For a short prompt, inline text is allowed:
 
 ```shell
-node skills/image-generation/scripts/generate-image.mjs gen --provider openai --prompt-text "Prompt text" --output path/to/output.png
+node <this-skill-directory>/scripts/generate-image.mjs gen --provider openai --prompt-text "Prompt text" --output path/to/output.png
 ```
 
 Use reference images for image-to-image or editing workflows. References must be JPEG, PNG, or WebP, and their order is the order described in the prompt as `1st image`, `2nd image`, etc.
 
 ```shell
-node skills/image-generation/scripts/generate-image.mjs gen `
+node <this-skill-directory>/scripts/generate-image.mjs gen `
   --provider openai `
   --reference path/to/ref1.png path/to/ref2.jpg `
   --prompt-file path/to/prompt.txt `
@@ -67,13 +70,13 @@ Use `--provider xai` for xAI image generation/editing. xAI defaults to `XAI_API_
 ## Model Listing
 
 ```shell
-node skills/image-generation/scripts/generate-image.mjs models --provider openai
-node skills/image-generation/scripts/generate-image.mjs models --provider xai
+node <this-skill-directory>/scripts/generate-image.mjs models --provider openai
+node <this-skill-directory>/scripts/generate-image.mjs models --provider xai
 ```
 
 ## Rules
 
-1. Run the bundled `.mjs` with `node` from the active workspace root so relative input/output paths resolve against the user's current project.
+1. Resolve the bundled `.mjs` path from this skill directory. Use the active workspace root as the shell working directory so relative input/output paths resolve against the user's current project.
 2. Always pass an explicit output path.
 3. Prefer `--prompt-file` when the prompt includes reference guides, long constraints, or user-provided text.
 4. Use API keys only through environment variables and `--api-key-env`; do not add key-file flags.
