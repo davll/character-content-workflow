@@ -33,7 +33,7 @@ Resolve the request into:
 
 - `user_prompt`: non-empty illustration request. If a prompt file is supplied, read it and trim whitespace.
 - Optional external reference images: JPEG/PNG paths supplied by the user or uploaded image metadata paths included in the current user message.
-- Optional image handoff preferences: provider, model, size, aspect ratio, resolution, overwrite, and verbosity.
+- Optional image handoff preferences: provider, model, size, aspect ratio, resolution, overwrite, dry-run, and verbosity.
 
 Reject empty prompts. Verify external reference paths exist and are JPEG/PNG before using them.
 
@@ -54,7 +54,7 @@ For uploaded conversation images:
 3. Verify the file is JPEG or PNG by content signature, not by filename alone.
 4. Treat the original upload path as transient host state. Do not pass `.codex` attachment paths directly to image generation when creating a durable workflow artifact.
 5. After the workflow run directory exists, copy each validated uploaded image into that run directory under `references/external-N.<ext>`, preserving the detected format extension.
-6. Use the copied workspace path, not the original upload path, in resolved manifests, prompt/reference alignment checks, and image-generation handoff.
+6. Use the copied workspace path, not the original upload path, in the resolved reference list, prompt/reference alignment checks, and image-generation handoff.
 7. If an uploaded image path is inaccessible, missing, or not JPEG/PNG, fail before prompt writing or generation and report which reference failed.
 
 ## Stage 1: Scene Inference
@@ -114,7 +114,7 @@ After inference, verify every selected sheet with `get-sheet-path`. Fail before 
 
 Create a numbered reference sequence. This sequence is the source of truth for both prompt text and image-generation handoff.
 
-Build a resolved reference manifest with IDs, original paths, and final handoff paths for workflow use, then build a pathless prompt reference manifest for prompt construction. The prompt-building stage may see IDs, kinds, roles, targets, descriptions, characters, sheet IDs, and prompt-building data, but must not see or mention local filesystem paths.
+Build a resolved reference list with IDs, original paths, and final handoff paths for workflow use, then build pathless prompt reference guide data for prompt construction. The prompt-building stage may see IDs, kinds, roles, targets, descriptions, characters, sheet IDs, and prompt-building data, but must not see or mention local filesystem paths.
 
 Reference ordering:
 
@@ -229,9 +229,12 @@ With default output directory, write:
 
 - Prompt: `output/illustrations/<scenario_filename>-<timestamp>/prompt.txt`
 - Image: `output/illustrations/<scenario_filename>-<timestamp>/image.png`
+- Metadata: `output/illustrations/<scenario_filename>-<timestamp>/metadata.json`
+- Dry-run metadata: `output/illustrations/<scenario_filename>-<timestamp>/metadata.dry-run.json`
 - Uploaded external references: `output/illustrations/<scenario_filename>-<timestamp>/references/external-N.<ext>`
 
-Do not write a manifest or any extra metadata artifact unless the user explicitly asks for one.
+Write metadata by default through the image-generation handoff. The metadata path must be explicit; do not rely on image-generation to infer a metadata path.
+When validating with image-generation dry-run before real generation, use `metadata.dry-run.json` for the dry-run handoff and reserve `metadata.json` for the real generation handoff. Do not reuse the real metadata path for dry-run, because the generated dry-run metadata would block the later real generation unless overwrite was requested.
 
 Copy validated uploaded conversation images into `references/` before writing the final prompt or handing off to image generation. Preserve user-supplied local reference paths that are already project/workspace artifacts unless they come from Codex attachment storage such as `.codex\codex-remote-attachments`; copy Codex attachment paths into `references/` because they are session/cache state, not durable workflow artifacts.
 
@@ -242,6 +245,8 @@ Use the `image-generation` skill for the final rendering step. Provide it this h
 - Prompt file: `output/illustrations/<scenario_filename>-<timestamp>/prompt.txt`
 - Reference images: all resolved registry paths and copied/durable external reference paths in the exact order used by the prompt's Reference Guide
 - Output image: `output/illustrations/<scenario_filename>-<timestamp>/image.png`
+- Metadata output for real generation: `output/illustrations/<scenario_filename>-<timestamp>/metadata.json`
+- Metadata output for image-generation dry-run validation: `output/illustrations/<scenario_filename>-<timestamp>/metadata.dry-run.json`
 - Provider/model/options: pass through only values explicitly requested by the user or inferred by this workflow
 - Overwrite/verbosity: pass through only when requested
 
@@ -253,8 +258,8 @@ Before handing off, perform a final sequence alignment check:
 4. No guide line exists in the prompt unless its matching reference path is passed to image-generation.
 5. No transient uploaded attachment path is passed to image-generation when a copied workspace reference path should exist.
 
-Do not duplicate the image-generation CLI command in this skill. Let the `image-generation` skill decide the exact command shape, provider API key handling, validation behavior, and current supported provider details.
+Do not duplicate the image-generation CLI command in this skill. Let the `image-generation` skill decide the exact command shape, provider API key handling, validation behavior, and current supported provider details. The handoff must include the explicit metadata output path so image-generation passes `--metadata`.
 
 ## Final Response
 
-Report the output image path, prompt path, selected group/sheet references, external reference roles, reference IDs, reference order, copied uploaded-reference paths when applicable, inferred scene, and warnings.
+Report the output image path, prompt path, metadata path, dry-run metadata path when used, selected group/sheet references, external reference roles, reference IDs, reference order, copied uploaded-reference paths when applicable, inferred scene, and warnings. If dry-run was used, clearly say image generation was skipped or only validated, depending on the user request.

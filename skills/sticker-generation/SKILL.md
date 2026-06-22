@@ -174,8 +174,11 @@ With default output directory, write:
 
 - Prompt: `output/character-stickers/<scenario_filename>-<timestamp>/prompt.txt`
 - Image: `output/character-stickers/<scenario_filename>-<timestamp>/image.png`
+- Metadata: `output/character-stickers/<scenario_filename>-<timestamp>/metadata.json`
+- Dry-run metadata: `output/character-stickers/<scenario_filename>-<timestamp>/metadata.dry-run.json`
 
-Do not write a manifest or any extra metadata artifact. For dry runs, write the prompt in the run directory and skip image generation.
+Write metadata by default through the image-generation handoff. The metadata path must be explicit; do not rely on image-generation to infer a metadata path. For dry runs, write the prompt in the run directory and use image-generation dry-run metadata to record the skipped generation request.
+When validating with image-generation dry-run before real generation, use `metadata.dry-run.json` for the dry-run handoff and reserve `metadata.json` for the real generation handoff. Do not reuse the real metadata path for dry-run, because the generated dry-run metadata would block the later real generation unless overwrite was requested.
 
 ## Stage 4: Image Generation Handoff
 
@@ -184,13 +187,15 @@ Use the `image-generation` skill for the final rendering step. Provide it this h
 - Prompt file: `output/character-stickers/<scenario_filename>-<timestamp>/prompt.txt`
 - Reference image: `<selected_sheet_path>` as the 1st reference image
 - Output image: `output/character-stickers/<scenario_filename>-<timestamp>/image.png`
+- Metadata output for real generation: `output/character-stickers/<scenario_filename>-<timestamp>/metadata.json`
+- Metadata output for image-generation dry-run validation: `output/character-stickers/<scenario_filename>-<timestamp>/metadata.dry-run.json`
 - Provider/model/options: pass through values explicitly requested by the user or inferred by this workflow, including the default image size inferred from the resolved layout when the user did not specify size
 - Overwrite/verbosity: pass through `--force` and `--verbose` only when requested
 
-Do not duplicate the image-generation CLI command in this skill. Let the `image-generation` skill decide the exact command shape, provider API key handling, dry-run behavior, and current supported provider details.
+Do not duplicate the image-generation CLI command in this skill. Let the `image-generation` skill decide the exact command shape, provider API key handling, dry-run behavior, and current supported provider details. The handoff must include the explicit metadata output path so image-generation passes `--metadata`.
 
-For dry runs, write the prompt and report the image-generation handoff that would be made, but do not call the provider.
+For user-requested dry-run-only workflows, write the prompt and call image-generation in dry-run mode with `metadata.dry-run.json`, then report the image-generation handoff that was validated without calling the provider. For validation dry-runs before real generation, also use `metadata.dry-run.json`; the later real generation must use `metadata.json`.
 
 ## Final Response
 
-Report the output image path, prompt path, selected group/sheet, inferred style/layout/size/action/caption, and warnings. If dry-run was used, clearly say image generation was skipped.
+Report the output image path, prompt path, metadata path, selected group/sheet, inferred style/layout/size/action/caption, and warnings. If dry-run was used, clearly say image generation was skipped.

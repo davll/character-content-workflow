@@ -45,6 +45,20 @@ export function checkRequestedOutputConflicts(
   return buildSkippedResult(existingPath, requestedOutputPaths);
 }
 
+export function checkMetadataOutputConflict(
+  options: GenerateImageOptions,
+  requestedOutputPaths: string[],
+  log: Logger,
+): GenerateImageResult | undefined {
+  const metadataPath = options.metadataPath;
+  if (!metadataPath || options.force || !existsSync(metadataPath)) {
+    return undefined;
+  }
+
+  log(`Metadata file already exists: ${metadataPath}`);
+  return buildSkippedResult(metadataPath, requestedOutputPaths);
+}
+
 export async function saveGeneratedImages(
   images: GeneratedImage[],
   outputPath: string,

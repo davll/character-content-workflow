@@ -22,8 +22,8 @@ var init_text_schema = __esm({
 });
 
 // packages/easy-ai-runtime/src/openai/rest.ts
-async function openAIJsonRequest(provider, path5, body, endpoint = {}) {
-  const response = await fetch(`${endpoint.baseUrl ?? OPENAI_BASE_URL}${path5}`, {
+async function openAIJsonRequest(provider, path6, body, endpoint = {}) {
+  const response = await fetch(`${endpoint.baseUrl ?? OPENAI_BASE_URL}${path6}`, {
     method: body === void 0 ? "GET" : "POST",
     headers: {
       Authorization: `Bearer ${provider.apiKey}`,
@@ -33,8 +33,8 @@ async function openAIJsonRequest(provider, path5, body, endpoint = {}) {
   });
   return readOpenAIResponse(response, endpoint.apiName);
 }
-async function openAIMultipartRequest(provider, path5, body, endpoint = {}) {
-  const response = await fetch(`${endpoint.baseUrl ?? OPENAI_BASE_URL}${path5}`, {
+async function openAIMultipartRequest(provider, path6, body, endpoint = {}) {
+  const response = await fetch(`${endpoint.baseUrl ?? OPENAI_BASE_URL}${path6}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${provider.apiKey}`
@@ -3066,7 +3066,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
       }
       return positiveOption || option2;
     };
-    const getErrorMessage = (option2) => {
+    const getErrorMessage2 = (option2) => {
       const bestOption = findBestOptionFromValue(option2);
       const optionKey = bestOption.attributeName();
       const source = this.getOptionValueSource(optionKey);
@@ -3075,7 +3075,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
       }
       return `option '${bestOption.flags}'`;
     };
-    const message = `error: ${getErrorMessage(option)} cannot be used with ${getErrorMessage(conflictingOption)}`;
+    const message = `error: ${getErrorMessage2(option)} cannot be used with ${getErrorMessage2(conflictingOption)}`;
     this.error(message, { code: "commander.conflictingOption" });
   }
   /**
@@ -3350,9 +3350,9 @@ Expecting one of '${allowedValues.join("', '")}'`);
    * @param {string} [path]
    * @return {(string|null|Command)}
    */
-  executableDir(path5) {
-    if (path5 === void 0) return this._executableDir;
-    this._executableDir = path5;
+  executableDir(path6) {
+    if (path6 === void 0) return this._executableDir;
+    this._executableDir = path6;
     return this;
   }
   /**
@@ -3749,22 +3749,66 @@ function sniffImageMimeType(data) {
   return null;
 }
 
-// packages/generate-image/src/outputs.ts
-import { existsSync } from "node:fs";
+// packages/generate-image/src/metadata.ts
 import fs3 from "node:fs/promises";
 import path3 from "node:path";
+async function writeMetadata(metadataPath, options, context, status, outputPaths, usage, error) {
+  if (!metadataPath) {
+    return;
+  }
+  const metadata = buildMetadata(options, context, status, outputPaths, usage, error);
+  await fs3.mkdir(path3.dirname(metadataPath), { recursive: true });
+  await fs3.writeFile(metadataPath, `${JSON.stringify(metadata, null, 2)}
+`, "utf-8");
+}
+function buildMetadata(options, context, status, outputPaths, usage, error) {
+  return {
+    prompt: context.prompt ?? null,
+    references: options.referenceImagePaths ?? [],
+    provider: context.provider ?? null,
+    model: context.model ?? null,
+    options: {
+      count: options.count ?? null,
+      size: options.size ?? null,
+      quality: options.quality ?? null,
+      aspectRatio: options.aspectRatio ?? null,
+      resolution: options.resolution ?? null,
+      moderation: options.moderation ?? null,
+      dryRun: options.dryRun ?? false,
+      force: options.force ?? false
+    },
+    status,
+    outputPaths,
+    usage: usage ?? null,
+    error: error ? getErrorMessage(error) : null
+  };
+}
+function getMetadataStatus(result) {
+  return result.status === "generated" ? "success" : "blocked";
+}
+function getErrorMessage(error) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+}
+
+// packages/generate-image/src/outputs.ts
+import { existsSync } from "node:fs";
+import fs4 from "node:fs/promises";
+import path4 from "node:path";
 function getOutputPaths(outputPath, count) {
   if (count === 1) {
     return [outputPath];
   }
-  const ext = path3.extname(outputPath);
+  const ext = path4.extname(outputPath);
   const base = ext ? outputPath.slice(0, -ext.length) : outputPath;
   return Array.from({ length: count }, (_, i) => i === 0 ? outputPath : `${base}_${i}${ext}`);
 }
 async function ensureOutputDir(outputPath, log) {
-  const dir = path3.dirname(outputPath);
+  const dir = path4.dirname(outputPath);
   log(`Ensuring output directory exists: ${dir}`);
-  await fs3.mkdir(dir, { recursive: true });
+  await fs4.mkdir(dir, { recursive: true });
 }
 function buildDryRunResult(outputPath, count) {
   const outputPaths = getOutputPaths(outputPath, count && count > 1 ? count : 1);
@@ -3784,6 +3828,14 @@ function checkRequestedOutputConflicts(options, log) {
   log(`Output file already exists: ${existingPath}`);
   return buildSkippedResult(existingPath, requestedOutputPaths);
 }
+function checkMetadataOutputConflict(options, requestedOutputPaths, log) {
+  const metadataPath = options.metadataPath;
+  if (!metadataPath || options.force || !existsSync(metadataPath)) {
+    return void 0;
+  }
+  log(`Metadata file already exists: ${metadataPath}`);
+  return buildSkippedResult(metadataPath, requestedOutputPaths);
+}
 async function saveGeneratedImages(images, outputPath, force, log) {
   if (images.length === 0) {
     throw new Error("Image provider returned no images.");
@@ -3796,7 +3848,7 @@ async function saveGeneratedImages(images, outputPath, force, log) {
   }
   if (images.length === 1) {
     log(`Saving image to: ${outputPaths[0]}`);
-    await fs3.writeFile(outputPaths[0], images[0].data);
+    await fs4.writeFile(outputPaths[0], images[0].data);
     return {
       status: "generated",
       message: `Image successfully generated and saved to: ${outputPaths[0]}`,
@@ -3806,7 +3858,7 @@ async function saveGeneratedImages(images, outputPath, force, log) {
   for (let i = 0; i < images.length; i++) {
     const targetPath = outputPaths[i];
     log(`Saving image ${i + 1}/${images.length} to: ${targetPath}`);
-    await fs3.writeFile(targetPath, images[i].data);
+    await fs4.writeFile(targetPath, images[i].data);
   }
   return {
     status: "generated",
@@ -3818,7 +3870,7 @@ ${outputPaths.map((p) => ` - ${p}`).join("\n")}`,
 function buildSkippedResult(existingPath, outputPaths) {
   return {
     status: "skipped",
-    message: `File ${path3.basename(existingPath)} already exists. Skipping generation.`,
+    message: `File ${path4.basename(existingPath)} already exists. Skipping generation.`,
     outputPaths
   };
 }
@@ -3832,27 +3884,85 @@ function findOutputConflict(outputPaths, force) {
 // packages/generate-image/src/runner.ts
 async function runGenerateImage(options) {
   const log = createLogger(options.verbose);
-  validateGenerationOptions(options);
-  const prompt = await resolvePrompt(options, log);
-  const provider = options.provider.toLowerCase();
-  assertSupportedProvider(provider);
-  const model = resolveModel(provider, options.model);
-  await ensureOutputDir(options.outputPath, log);
-  const skipped = checkRequestedOutputConflicts(options, log);
-  if (skipped) {
-    return skipped;
+  const metadataContext = {};
+  try {
+    validateGenerationOptions(options);
+    const prompt = await resolvePrompt(options, log);
+    metadataContext.prompt = prompt;
+    const provider = options.provider.toLowerCase();
+    metadataContext.provider = provider;
+    assertSupportedProvider(provider);
+    const model = resolveModel(provider, options.model);
+    metadataContext.model = model;
+    await ensureOutputDir(options.outputPath, log);
+    const skipped = checkRequestedOutputConflicts(options, log);
+    if (skipped) {
+      await writeMetadata(
+        options.metadataPath,
+        options,
+        metadataContext,
+        getMetadataStatus(skipped),
+        skipped.outputPaths,
+        skipped.usage,
+        null
+      );
+      return skipped;
+    }
+    const metadataSkipped = checkMetadataOutputConflict(
+      options,
+      getOutputPaths(options.outputPath, options.count && options.count > 1 ? options.count : 1),
+      log
+    );
+    if (metadataSkipped) {
+      return metadataSkipped;
+    }
+    const images = await loadReferenceImages(options.referenceImagePaths);
+    const generationRequest = buildGenerationRequest(model, prompt, images, options);
+    if (options.dryRun) {
+      log("Dry run: skipping provider setup and image generation.");
+      const result2 = buildDryRunResult(options.outputPath, options.count);
+      await writeMetadata(
+        options.metadataPath,
+        options,
+        metadataContext,
+        getMetadataStatus(result2),
+        result2.outputPaths,
+        result2.usage,
+        null
+      );
+      return result2;
+    }
+    const providerHandle = getProvider(provider, options.apiKey, options.verbose);
+    log(`Invoking ${provider} provider...`);
+    const result = await generateImage(providerHandle, generationRequest);
+    log(`Received ${result.images.length} image(s) from ${provider}`);
+    const saveResult = await saveGeneratedImages(result.images, options.outputPath, options.force, log);
+    saveResult.usage = result.usage;
+    await writeMetadata(
+      options.metadataPath,
+      options,
+      metadataContext,
+      getMetadataStatus(saveResult),
+      saveResult.outputPaths,
+      saveResult.usage,
+      null
+    );
+    return saveResult;
+  } catch (error) {
+    try {
+      await writeMetadata(
+        options.metadataPath,
+        options,
+        metadataContext,
+        "failed",
+        [],
+        void 0,
+        error
+      );
+    } catch {
+    }
+    throw error;
   }
-  const images = await loadReferenceImages(options.referenceImagePaths);
-  const generationRequest = buildGenerationRequest(model, prompt, images, options);
-  if (options.dryRun) {
-    log("Dry run: skipping provider setup and image generation.");
-    return buildDryRunResult(options.outputPath, options.count);
-  }
-  const providerHandle = getProvider(provider, options.apiKey, options.verbose);
-  log(`Invoking ${provider} provider...`);
-  const result = await generateImage(providerHandle, generationRequest);
-  log(`Received ${result.images.length} image(s) from ${provider}`);
-  return await saveGeneratedImages(result.images, options.outputPath, options.force, log);
 }
 function validateGenerationOptions(options) {
   if (!options.outputPath?.trim()) {
@@ -3882,12 +3992,13 @@ function buildGenerationRequest(model, prompt, images, options) {
 async function main(argv = process.argv) {
   const program2 = new Command();
   program2.name("generate-image").description("Repository-local CLI for generating images via OpenAI or xAI").version("1.0.0");
-  program2.command("gen").description("Generate an image").option("-o, --output <path>", "Output image path").option("--prompt-file <path>", "Path to the text file containing the prompt").option("--prompt-text <text>", "Inline prompt text").option("-p, --provider <provider>", "API provider (openai, xai)", "openai").option("-m, --model <model>", "Specific model ID").option("-c, --count <number>", "Number of images to generate", parseInt).option("-s, --size <size>", "Image size (e.g. 1024x1024)").option("-q, --quality <quality>", "Image quality (low, medium, high, auto for gpt-image; standard, hd for dall-e)").option("--aspect-ratio <ratio>", "Aspect ratio (e.g. 1:1, 16:9)").option("--resolution <res>", "Resolution (e.g. 1024x1024)").option("--api-key-env <name>", "Environment variable name containing the API key").option("--moderation <level>", "Content moderation level (auto, low) [OpenAI only]", "auto").option("-r, --reference <paths...>", "Paths to reference images for editing").option("--dry-run", "Validate inputs without calling the image generation API", false).option("-v, --verbose", "Print verbose output", false).option("-f, --force", "Overwrite existing output file", false).action(async (options) => {
+  program2.command("gen").description("Generate an image").option("-o, --output <path>", "Output image path").option("--metadata <path>", "Optional metadata JSON output path").option("--prompt-file <path>", "Path to the text file containing the prompt").option("--prompt-text <text>", "Inline prompt text").option("-p, --provider <provider>", "API provider (openai, xai)", "openai").option("-m, --model <model>", "Specific model ID").option("-c, --count <number>", "Number of images to generate", parseInt).option("-s, --size <size>", "Image size (e.g. 1024x1024)").option("-q, --quality <quality>", "Image quality (low, medium, high, auto for gpt-image; standard, hd for dall-e)").option("--aspect-ratio <ratio>", "Aspect ratio (e.g. 1:1, 16:9)").option("--resolution <res>", "Resolution (e.g. 1024x1024)").option("--api-key-env <name>", "Environment variable name containing the API key").option("--moderation <level>", "Content moderation level (auto, low) [OpenAI only]", "auto").option("-r, --reference <paths...>", "Paths to reference images for editing").option("--dry-run", "Validate inputs without calling the image generation API", false).option("-v, --verbose", "Print verbose output", false).option("-f, --force", "Overwrite existing output file", false).action(async (options) => {
     const genOptions = {
       provider: options.provider,
       model: options.model,
       count: options.count,
       outputPath: options.output,
+      metadataPath: options.metadata,
       promptFilePath: options.promptFile,
       promptText: options.promptText,
       referenceImagePaths: options.reference,
@@ -3949,9 +4060,9 @@ function printErrorAndExit(error) {
 
 // packages/generate-image/src/env.ts
 import { existsSync as existsSync2, readFileSync } from "node:fs";
-import path4 from "node:path";
+import path5 from "node:path";
 function loadDotEnv(filePath = ".env") {
-  const resolvedPath = path4.resolve(filePath);
+  const resolvedPath = path5.resolve(filePath);
   if (!existsSync2(resolvedPath)) {
     return;
   }

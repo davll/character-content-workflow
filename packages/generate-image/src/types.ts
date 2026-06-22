@@ -2,6 +2,7 @@ export interface GenerateImageOptions {
   provider: string;
   model?: string;
   outputPath: string;
+  metadataPath?: string;
   promptFilePath?: string;
   promptText?: string;
   referenceImagePaths?: string[];
@@ -21,6 +22,11 @@ export interface GenerateImageResult {
   status: 'generated' | 'skipped';
   message: string;
   outputPaths: string[];
+  usage?: {
+    inputTokens?: number;
+    outputTokens?: number;
+    totalTokens?: number;
+  };
 }
 
 export type Logger = (msg: string) => void;

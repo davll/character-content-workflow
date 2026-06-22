@@ -26,6 +26,13 @@ Image provider calls can legitimately run for several minutes. When invoking
 (`timeout_ms: 600000`) so slow image generation is not misclassified as a
 timeout and aborted.
 
+Non-dry-run image generation calls contact the provider over the network. In
+Codex sandboxed environments, request elevated permission before the first
+non-dry-run `gen` attempt instead of trying once in the sandbox. A sandboxed
+network failure can still write `failed` metadata to `--metadata`, and that
+metadata file will block the approved retry unless the command uses `--force`
+or a fresh metadata path. Dry-runs do not need network elevation.
+
 Prefer prompt files for non-trivial prompts:
 
 ```shell
@@ -56,6 +63,7 @@ Use `--provider xai` for xAI image generation/editing. xAI defaults to `XAI_API_
 ## Arguments
 
 - `--output` / `-o`: required output image path. The CLI creates the output directory.
+- `--metadata <path>`: optional metadata JSON path. When provided, the CLI records the resolved prompt, reference paths, provider/model, options, status, output paths, token usage when available, and errors when generation fails.
 - `--prompt-file <path>` or `--prompt-text <text>`: one is required.
 - `--provider` / `-p`: `openai` or `xai`. Default is `openai`.
 - `--model` / `-m`: optional. Defaults are `gpt-image-2` for OpenAI and `grok-imagine-image-quality` for xAI.
@@ -81,5 +89,6 @@ node <this-skill-directory>/scripts/generate-image.mjs models --provider xai
 3. Prefer `--prompt-file` when the prompt includes reference guides, long constraints, or user-provided text.
 4. Use API keys only through environment variables and `--api-key-env`; do not add key-file flags.
 5. Use `--dry-run` before expensive or risky calls when validating command shape.
-6. Use `--force` only when the user asks to overwrite or when regenerating a known disposable artifact.
-7. Do not call the old `easy-image-gen` package or use `npm run -w` for skill execution.
+6. For non-dry-run `gen` calls, request elevated permission before the first provider call so network access is available and failure metadata is not created by a sandbox-only fetch failure.
+7. Use `--force` only when the user asks to overwrite or when regenerating a known disposable artifact. If retrying after a failed metadata file was already written, prefer a fresh metadata path unless the existing run directory is disposable and overwrite was approved.
+8. Do not call the old `easy-image-gen` package or use `npm run -w` for skill execution.

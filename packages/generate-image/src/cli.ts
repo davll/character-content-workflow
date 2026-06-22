@@ -15,6 +15,7 @@ export async function main(argv = process.argv): Promise<void> {
     .command('gen')
     .description('Generate an image')
     .option('-o, --output <path>', 'Output image path')
+    .option('--metadata <path>', 'Optional metadata JSON output path')
     .option('--prompt-file <path>', 'Path to the text file containing the prompt')
     .option('--prompt-text <text>', 'Inline prompt text')
     .option('-p, --provider <provider>', 'API provider (openai, xai)', 'openai')
@@ -36,6 +37,7 @@ export async function main(argv = process.argv): Promise<void> {
         model: options.model,
         count: options.count,
         outputPath: options.output,
+        metadataPath: options.metadata,
         promptFilePath: options.promptFile,
         promptText: options.promptText,
         referenceImagePaths: options.reference,
