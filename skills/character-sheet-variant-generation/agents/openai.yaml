@@ -1,0 +1,4 @@
+interface:
+  display_name: "Character Sheet Variant Generation"
+  short_description: "Generate variant character sheets."
+  default_prompt: "Use $character-sheet-variant-generation to create a variant character sheet from registered base sheets."
