@@ -153,7 +153,7 @@ Apply these rules to every prompt before writing the final artifact:
 4. Explicitly preserve registry constraints that prevent identity drift, such as height relationships, skin tone contrast, face/body proportions, and outfit assignment.
 5. Prevent feature bleeding by saying which character owns which visible outfit, prop, body position, and interaction when the scene includes close contact or overlapping poses.
 6. If a prompt asks for a pose, background, style, or prop from an external reference, state that the external reference must not override registry character identity or clothing.
-7. Do not copy the registry sheet layout, standing order, neutral pose, or plain reference composition unless the user explicitly asks for that layout.
+7. Do not copy registry sheet layout artifacts: standing order, neutral pose, gray panels, divider lines, character name labels, annotation text, reference-sheet framing, or plain reference composition. The illustration's character placement, action, interaction, viewing angle, background, and composition must come from Scene Direction and Composition unless the user explicitly asks to copy a character sheet layout or pose.
 8. If the selected sheet is a combined group sheet, use it for all characters in that group and keep the group's internal identity distinctions intact.
 
 Use this structure:
@@ -194,14 +194,14 @@ Prompt-building rules:
 
 Reference guide role formats:
 
-- Character registry sheet: `<Nth> image: ONLY for <character or group>'s identity, outfit, proportions, and physical traits. Do not copy the sheet layout or pose unless requested.`
+- Character registry sheet: `<Nth> image: ONLY for <character or group>'s identity, outfit ownership, relative scale/proportions, and stable physical traits. Do not copy the sheet layout, standing order, neutral pose, labels, annotations, background panels, or reference-sheet framing. Scene composition comes from the prompt unless the user explicitly requests copying the sheet layout or pose.`
 - External character image: `<Nth> image: ONLY for <target character>'s extra identity details. Do not copy unrelated clothing, background, or pose.`
 - Pose/structure image: `<Nth> image: ONLY for pose, body positioning, physical interaction, and composition. Do not copy character identity, outfit, or background.`
 - Background/environment image: `<Nth> image: ONLY for architecture, lighting, environmental mood, and scenery. Do not copy characters or foreground objects.`
 - Object/prop image: `<Nth> image: ONLY for the design and details of <target prop>.`
 - Style image: `<Nth> image: ONLY for broad rendering style, line quality, color mood, or lighting treatment. Do not copy characters or composition unless requested.`
 
-If a registry sheet includes `reference_logic` segments, merge that logic into its reference guide line.
+If a registry sheet includes `reference_logic` segments, merge only reference-specific usage guidance into its reference guide line. Do not merge workflow-specific policy. If registry `reference_logic` conflicts with this skill's reference rules, ignore the conflicting registry content and add a warning.
 
 ## Stage 4: Artifact Paths
 

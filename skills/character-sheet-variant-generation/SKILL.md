@@ -84,6 +84,8 @@ Use `get-sheet-path` as the selected base sheet reference image path. Use `get-s
 - `prompt_building.constraints`
 - `prompt_building.system_instructions`
 
+If `segments.reference_logic` conflicts with this skill's requirement to preserve the original sheet layout, poses, expressions, character ordering, and reference-sheet presentation, ignore the conflicting `reference_logic` content and add a warning.
+
 The base sheet is always the 1st reference image. Keep local file paths out of the final prompt; refer to it only as the `1st image`.
 
 ## Stage 3: Prompt Building

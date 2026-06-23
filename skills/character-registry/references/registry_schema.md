@@ -96,6 +96,22 @@ segments:
 
 Good segment keys are short topic names such as `character`, `outfit`, `relationship`, `pose_logic`, `reference_logic`, or `style_constraints`.
 
+Use `reference_logic` only for guidance about how the reference image itself should be used. Do not put workflow-specific policy in `reference_logic`, such as whether an illustration workflow should copy layout or whether a character-sheet variant workflow should preserve sheet layout.
+
+Good `reference_logic` example:
+
+```yaml
+reference_logic:
+  - Use this combined sheet for both characters' identities, relative scale, and outfit ownership.
+```
+
+Bad `reference_logic` example:
+
+```yaml
+reference_logic:
+  - Do not copy the layout or pose from the reference image.
+```
+
 ### `constraints`
 
 Use `constraints` for hard rules that prevent identity drift or reference confusion.
