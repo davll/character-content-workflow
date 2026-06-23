@@ -31,7 +31,7 @@ characters:
 - `names`: Display names, aliases, localized names, or search names that help match user prompts.
 - `characteristics`: Durable traits that are safe to reuse across contexts, such as body type, face shape, personality cues, or recurring visual identity.
 
-Do not put outfit-specific details here unless they are truly permanent. If a detail only appears in one reference sheet, put it in that sheet's description or prompt-building data.
+Do not put outfit-specific details here unless they are truly permanent. If a detail only appears in one reference sheet, put it in that sheet's summary or prompt-building data.
 
 ## `groups`
 
@@ -44,7 +44,7 @@ groups:
       - mike
     sheets: {}
     prompt_building:
-      segments: {}
+      descriptions: {}
       constraints: []
       system_instructions: []
 ```
@@ -62,10 +62,10 @@ Use `sheets` for concrete visual references that can be passed to image generati
 sheets:
   navy_uniform:
     path: sheets/mike-navy-uniform.png
-    description: Full-body reference sheet for Mikhail Oryol in a navy uniform.
+    summary: Full-body reference sheet for Mikhail Oryol in a navy uniform.
     prompt_building:
-      segments:
-        outfit:
+      descriptions:
+        outfit_details:
           - Mikhail wears the navy uniform shown in the sheet.
       constraints:
         - Preserve Mikhail's facial structure, proportions, and uniform ownership.
@@ -73,8 +73,10 @@ sheets:
 ```
 
 - `path`: Required. Must be a relative path from the registry root.
-- `description`: Required. Describe what the sheet contains and when to choose it.
+- `summary`: Required. Concise sheet-selection text for scene inference. Describe what the sheet contains and when to choose it.
 - `prompt_building`: Optional but recommended when the sheet includes important generation guidance.
+
+Keep `summary` short and selection-oriented. Put prompt-building semantic material in `prompt_building.descriptions`, not in `summary`.
 
 Only add a sheet when there is a concrete existing image path from the user prompt, an uploaded image copied into the workspace, or a known workspace file. Do not invent sheet paths.
 
@@ -82,19 +84,21 @@ Only add a sheet when there is a concrete existing image path from the user prom
 
 `prompt_building` can appear at group level and sheet level. Downstream workflows merge group-level and sheet-level prompt-building data.
 
-### `segments`
+### `descriptions`
 
-Use `segments` for reusable prompt phrases grouped by topic.
+Use `descriptions` for positive semantic description material grouped by topic. These entries are input material for prompt builders; they are not literal prompt snippets and are not guaranteed to appear verbatim in a final prompt. A prompt builder may flatten, filter, reorder, restructure, or rewrite them for the target workflow.
 
 ```yaml
-segments:
-  character:
+descriptions:
+  characteristics:
     - Mikhail has the face, proportions, and posture shown in the reference sheet.
-  outfit:
+  outfit_details:
     - Mikhail wears the shown navy uniform.
 ```
 
-Good segment keys are short topic names such as `character`, `outfit`, `relationship`, `pose_logic`, `reference_logic`, or `style_constraints`.
+Good description keys are short topic names such as `style`, `relationship`, `characteristics`, `outfit_details`, or `reference_logic`.
+
+Keep descriptions factual, positive, and descriptive. Do not use descriptions for hard preservation rules, failure-prevention rules, prompt construction behavior, or system-level policy. Put hard rules in `constraints`; put prompt construction behavior in `system_instructions`.
 
 Use `reference_logic` only for guidance about how the reference image itself should be used. Do not put workflow-specific policy in `reference_logic`, such as whether an illustration workflow should copy layout or whether a character-sheet variant workflow should preserve sheet layout.
 
@@ -133,7 +137,7 @@ system_instructions:
   - Treat the combined sheet as the source of truth for both characters' relative scale and outfit ownership.
 ```
 
-Do not use this field for ordinary descriptive details that belong in `segments` or `description`.
+Do not use this field for ordinary descriptive details that belong in `descriptions` or `summary`.
 
 ## Path Rules
 
@@ -175,7 +179,7 @@ groups:
       - aiko
     sheets: {}
     prompt_building:
-      segments: {}
+      descriptions: {}
       constraints: []
       system_instructions: []
 ```
@@ -196,16 +200,16 @@ groups:
     sheets:
       default:
         path: sheets/aiko-default.png
-        description: Full-body reference sheet for Aiko in her default outfit.
+        summary: Full-body reference sheet for Aiko in her default outfit.
         prompt_building:
-          segments:
-            character:
+          descriptions:
+            characteristics:
               - Aiko's identity, outfit, and proportions are defined by the default sheet.
           constraints:
             - Preserve Aiko's face, hairstyle, outfit, and body proportions from the sheet.
           system_instructions: []
     prompt_building:
-      segments: {}
+      descriptions: {}
       constraints: []
       system_instructions: []
 ```
@@ -230,9 +234,9 @@ groups:
     sheets:
       navy_uniform:
         path: sheets/mike_x_hiroshi-navy_uniforms.png
-        description: Combined character sheet for Mikhail Oryol and Hiroshi Amano wearing navy uniforms.
+        summary: Combined character sheet for Mikhail Oryol and Hiroshi Amano wearing navy uniforms.
         prompt_building:
-          segments:
+          descriptions:
             reference_logic:
               - Use this combined sheet for both characters' identities, relative scale, and uniform ownership.
           constraints:
@@ -240,7 +244,7 @@ groups:
           system_instructions:
             - Treat the combined sheet as the source of truth for both characters together.
     prompt_building:
-      segments: {}
+      descriptions: {}
       constraints: []
       system_instructions: []
 ```

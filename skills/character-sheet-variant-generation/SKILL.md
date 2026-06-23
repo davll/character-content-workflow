@@ -65,7 +65,7 @@ Use the `character-registry` skill to validate the registry, then list all regis
 
 Inference rules:
 
-1. Identify the target character or group from character names, aliases, group composition, and sheet descriptions returned by `character-registry list-all`.
+1. Identify the target character or group from character names, aliases, group composition, and sheet summaries returned by `character-registry list-all`.
 2. For multi-character sheet variants, prefer a combined group sheet when the registry offers one. Use separate sheets only when no combined group sheet fits the request, and warn that preserving a single original sheet layout may be weaker.
 3. Select the most relevant base sheet for the requested variant. Prefer the current or default character sheet unless the prompt references a specific existing outfit, age, era, expression set, or style source.
 4. Infer `outfit` when the requested change is clothing, costume, armor, uniform, accessories worn as clothing, or dress code.
@@ -79,12 +79,12 @@ After inference, verify the selected sheet with `get-sheet-path`. Fail before ge
 
 Use `get-sheet-path` as the selected base sheet reference image path. Use `get-sheet-info` to load the selected sheet's prompt-building data:
 
-- sheet description
-- `prompt_building.segments`
+- sheet summary
+- `prompt_building.descriptions`
 - `prompt_building.constraints`
 - `prompt_building.system_instructions`
 
-If `segments.reference_logic` conflicts with this skill's requirement to preserve the original sheet layout, poses, expressions, character ordering, and reference-sheet presentation, ignore the conflicting `reference_logic` content and add a warning.
+If `descriptions.reference_logic` conflicts with this skill's requirement to preserve the original sheet layout, poses, expressions, character ordering, and reference-sheet presentation, ignore the conflicting `reference_logic` content and add a warning.
 
 The base sheet is always the 1st reference image. Keep local file paths out of the final prompt; refer to it only as the `1st image`.
 
@@ -150,10 +150,10 @@ Append registry-derived information after the selected template:
 
 ```text
 Base Sheet Description:
-<sheet description>
+<sheet summary>
 
 Character Traits:
-- <flattened registry segments relevant to identity and stable traits>
+- <flattened registry descriptions relevant to identity and stable traits>
 
 Visual Constraints:
 - <each registry constraint, rewritten as a preservation requirement>

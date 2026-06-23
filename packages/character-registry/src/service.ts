@@ -13,7 +13,7 @@ type CharacterInput = Parameters<CharacterRegistry['addCharacter']>[1];
 
 export type SheetAttachData = {
   path?: string;
-  description: string;
+  summary: string;
   prompt_building?: PromptBuilding;
 };
 

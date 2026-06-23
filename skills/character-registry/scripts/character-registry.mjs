@@ -20262,25 +20262,26 @@ var CharacterSchema = external_exports.object({
   names: external_exports.array(external_exports.string()),
   characteristics: external_exports.array(external_exports.string()).default([])
 });
+var DescriptionBucketsSchema = external_exports.record(external_exports.string(), external_exports.array(external_exports.string()));
 var PromptBuildingSchema = external_exports.object({
-  segments: external_exports.record(external_exports.string(), external_exports.array(external_exports.string())).default({}),
+  descriptions: DescriptionBucketsSchema.default({}),
   constraints: external_exports.array(external_exports.string()).default([]),
   system_instructions: external_exports.array(external_exports.string()).default([])
-});
+}).strict();
 var SheetSchema = external_exports.object({
   path: external_exports.string(),
-  description: external_exports.string(),
+  summary: external_exports.string(),
   prompt_building: PromptBuildingSchema.default({
-    segments: {},
+    descriptions: {},
     constraints: [],
     system_instructions: []
   })
-});
+}).strict();
 var GroupSchema = external_exports.object({
   characters: external_exports.array(CharacterIdSchema),
   sheets: external_exports.record(SheetIdSchema, SheetSchema).default({}),
   prompt_building: PromptBuildingSchema.default({
-    segments: {},
+    descriptions: {},
     constraints: [],
     system_instructions: []
   })
@@ -20380,7 +20381,7 @@ var CharacterRegistry2 = class _CharacterRegistry {
       characters: [...grp.characters],
       sheets: Object.entries(grp.sheets).map(([id2, sht]) => ({
         id: id2,
-        description: sht.description
+        summary: sht.summary
       }))
     }));
     return { characters, groups };
@@ -20395,29 +20396,29 @@ var CharacterRegistry2 = class _CharacterRegistry {
     const group = this.getGroup(groupId);
     const sheet = group?.sheets[sheetId];
     if (!group || !sheet) return void 0;
-    const mergedSegments = /* @__PURE__ */ new Map();
+    const mergedDescriptions = /* @__PURE__ */ new Map();
     const groupPromptBuilding = group.prompt_building;
     const sheetPromptBuilding = sheet.prompt_building;
-    for (const [key, value] of Object.entries(groupPromptBuilding?.segments || {})) {
+    for (const [key, value] of Object.entries(groupPromptBuilding?.descriptions || {})) {
       const vals = value;
-      if (!mergedSegments.has(key)) {
-        mergedSegments.set(key, [...vals]);
+      if (!mergedDescriptions.has(key)) {
+        mergedDescriptions.set(key, [...vals]);
       } else {
-        mergedSegments.get(key).push(...vals);
+        mergedDescriptions.get(key).push(...vals);
       }
     }
-    for (const [key, value] of Object.entries(sheetPromptBuilding?.segments || {})) {
+    for (const [key, value] of Object.entries(sheetPromptBuilding?.descriptions || {})) {
       const vals = value;
-      if (!mergedSegments.has(key)) {
-        mergedSegments.set(key, [...vals]);
+      if (!mergedDescriptions.has(key)) {
+        mergedDescriptions.set(key, [...vals]);
       } else {
-        mergedSegments.get(key).push(...vals);
+        mergedDescriptions.get(key).push(...vals);
       }
     }
     const constraints = (groupPromptBuilding?.constraints || []).concat(sheetPromptBuilding?.constraints || []);
     const system_instructions = (groupPromptBuilding?.system_instructions || []).concat(sheetPromptBuilding?.system_instructions || []);
     return {
-      segments: Object.fromEntries(mergedSegments.entries()),
+      descriptions: Object.fromEntries(mergedDescriptions.entries()),
       constraints,
       system_instructions
     };
@@ -20428,7 +20429,7 @@ var CharacterRegistry2 = class _CharacterRegistry {
     if (!group || !sheet) return void 0;
     return {
       characters: Array.from(group.characters),
-      description: sheet.description,
+      summary: sheet.summary,
       prompt_building: this.getGroupSheetPromptBuilding(groupId, sheetId)
     };
   }

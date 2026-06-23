@@ -10,6 +10,7 @@ import {
   SheetSchema,
   SheetIdSchema,
   CharacterRegistryDataSchema,
+  PromptBuildingSchema,
 } from './types.ts';
 import type {
   CharacterRegistryData,
@@ -46,9 +47,11 @@ export type {
 
 type CharacterInput = z.input<typeof CharacterSchema>;
 type GroupInput = Omit<z.input<typeof GroupSchema>, 'sheets'>;
-
-type SheetInput = Omit<z.input<typeof SheetSchema>, 'path'> & {
+type PromptBuildingInput = z.input<typeof PromptBuildingSchema>;
+type SheetInput = {
   path: string;
+  summary: string;
+  prompt_building?: PromptBuildingInput;
 };
 
 export class CharacterRegistry {
@@ -159,7 +162,7 @@ export class CharacterRegistry {
         sheets: Object.entries(grp.sheets).
           map(([id, sht]) => ({
             id,
-            description: sht.description,
+            summary: sht.summary,
           })),
       }));
     
@@ -178,26 +181,26 @@ export class CharacterRegistry {
     const sheet = group?.sheets[sheetId];
     if (!group || !sheet) return undefined;
 
-    const mergedSegments = new Map<string, string[]>();
+    const mergedDescriptions = new Map<string, string[]>();
 
     const groupPromptBuilding = group.prompt_building;
     const sheetPromptBuilding = sheet.prompt_building;
 
-    // Merge segments
-    for (const [key, value] of Object.entries(groupPromptBuilding?.segments || {})) {
+    // Merge descriptions
+    for (const [key, value] of Object.entries(groupPromptBuilding?.descriptions || {})) {
       const vals = value as string[];
-      if (!mergedSegments.has(key)) {
-        mergedSegments.set(key, [...vals]);
+      if (!mergedDescriptions.has(key)) {
+        mergedDescriptions.set(key, [...vals]);
       } else {
-        mergedSegments.get(key)!.push(...vals);
+        mergedDescriptions.get(key)!.push(...vals);
       }
     }
-    for (const [key, value] of Object.entries(sheetPromptBuilding?.segments || {})) {
+    for (const [key, value] of Object.entries(sheetPromptBuilding?.descriptions || {})) {
       const vals = value as string[];
-      if (!mergedSegments.has(key)) {
-        mergedSegments.set(key, [...vals]);
+      if (!mergedDescriptions.has(key)) {
+        mergedDescriptions.set(key, [...vals]);
       } else {
-        mergedSegments.get(key)!.push(...vals);
+        mergedDescriptions.get(key)!.push(...vals);
       }
     }
 
@@ -206,7 +209,7 @@ export class CharacterRegistry {
     const system_instructions = (groupPromptBuilding?.system_instructions || []).concat(sheetPromptBuilding?.system_instructions || []);
 
     return {
-      segments: Object.fromEntries(mergedSegments.entries()),
+      descriptions: Object.fromEntries(mergedDescriptions.entries()),
       constraints,
       system_instructions,
     };
@@ -219,7 +222,7 @@ export class CharacterRegistry {
 
     return {
       characters: Array.from(group.characters),
-      description: sheet.description,
+      summary: sheet.summary,
       prompt_building: this.getGroupSheetPromptBuilding(groupId, sheetId)!,
     };
   }

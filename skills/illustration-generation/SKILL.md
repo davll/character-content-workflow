@@ -12,7 +12,7 @@ Run the illustration workflow in this skill. Use the `character-registry` skill 
 - Output directory: `output/illustrations`
 - Image provider preference: `openai` unless the user requests another provider
 - Image model preference: omit unless requested
-- Response provider/model for reasoning: use your own reasoning unless the user explicitly asks for a separate model call. The original workflow used OpenAI `gpt-5.4-mini`.
+- Response provider/model for reasoning: use your own reasoning unless the user explicitly asks for a separate model call.
 
 ## Registry Lookup
 
@@ -99,7 +99,7 @@ Use the `character-registry` skill to validate the registry, then list all regis
 
 Inference rules:
 
-1. Identify target characters and groups from character names, group composition, relationships, and sheet descriptions returned by `character-registry list-all`.
+1. Identify target characters and groups from character names, group composition, relationships, and sheet summaries returned by `character-registry list-all`.
 2. For multi-character illustrations, prefer a combined group sheet when the registry offers one. Use separate sheets only when no combined group sheet fits the request.
 3. Match outfit or scenario cues explicitly when present. If no outfit is specified, choose the best dressed/default illustration sheet; avoid base/naked/minimal sheets unless explicitly requested or no dressed sheet exists.
 4. Parse the scene into location, action, mood, camera angle, character positions, physical interaction, and important props.
@@ -124,8 +124,8 @@ Reference ordering:
 
 For each registry sheet, run `get-sheet-info` and use:
 
-- sheet description
-- `prompt_building.segments`
+- sheet summary
+- `prompt_building.descriptions`
 - `prompt_building.constraints`
 - `prompt_building.system_instructions`
 
@@ -141,7 +141,7 @@ Before prompt building, validate:
 
 ## Stage 3: Prompt Building
 
-Build one final image prompt using the selected references. Follow registry `system_instructions`, use `segments` as content building blocks, and enforce every registry `constraint`.
+Build one final image prompt using the selected references. Follow registry `system_instructions`, use `descriptions` as semantic content building blocks, and enforce every registry `constraint`.
 
 ## Character Consistency Guardrails
 
@@ -201,7 +201,7 @@ Reference guide role formats:
 - Object/prop image: `<Nth> image: ONLY for the design and details of <target prop>.`
 - Style image: `<Nth> image: ONLY for broad rendering style, line quality, color mood, or lighting treatment. Do not copy characters or composition unless requested.`
 
-If a registry sheet includes `reference_logic` segments, merge only reference-specific usage guidance into its reference guide line. Do not merge workflow-specific policy. If registry `reference_logic` conflicts with this skill's reference rules, ignore the conflicting registry content and add a warning.
+If a registry sheet includes `descriptions.reference_logic`, merge only reference-specific usage guidance into its reference guide line. Do not merge workflow-specific policy. If registry `descriptions.reference_logic` conflicts with this skill's reference rules, ignore the conflicting registry content and add a warning.
 
 ## Stage 4: Artifact Paths
 

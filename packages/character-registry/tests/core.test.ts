@@ -21,7 +21,7 @@ describe('CharacterRegistry core', () => {
         mike_and_hiroshi: {
           characters: ['mike', 'hiroshi'],
           prompt_building: {
-            segments: {
+            descriptions: {
               style: ['anime'],
               global: ['high quality'],
             },
@@ -31,9 +31,9 @@ describe('CharacterRegistry core', () => {
           sheets: {
             suit: {
               path: 'path/to/suit.png',
-              description: 'Suit outfit',
+              summary: 'Suit outfit',
               prompt_building: {
-                segments: {
+                descriptions: {
                   style: ['realistic'],
                   outfit: ['black suit'],
                 },
@@ -51,9 +51,9 @@ describe('CharacterRegistry core', () => {
     assert.equal(mike?.names[0], 'Mike');
     assert.equal(mike?.characteristics?.[0], 'tall');
     assert.ok(merged);
-    assert.deepEqual(merged.segments.style, ['anime', 'realistic']);
-    assert.equal(merged.segments.global[0], 'high quality');
-    assert.equal(merged.segments.outfit[0], 'black suit');
+    assert.deepEqual(merged.descriptions.style, ['anime', 'realistic']);
+    assert.equal(merged.descriptions.global[0], 'high quality');
+    assert.equal(merged.descriptions.outfit[0], 'black suit');
     assert.equal(merged.constraints.length, 2);
     assert.equal(merged.system_instructions.length, 2);
   });
@@ -68,7 +68,7 @@ describe('CharacterRegistry core', () => {
         mike_and_hiroshi: {
           characters: ['mike', 'hiroshi'],
           sheets: {
-            suit: { path: 'suit.png', description: 'Suit outfit' },
+            suit: { path: 'suit.png', summary: 'Suit outfit' },
           },
         },
       },
@@ -78,6 +78,7 @@ describe('CharacterRegistry core', () => {
     assert.equal(info.characters.length, 2);
     assert.equal(info.groups.length, 1);
     assert.equal(info.groups[0].sheets[0].id, 'suit');
+    assert.equal(info.groups[0].sheets[0].summary, 'Suit outfit');
   });
 
   test('rejects invalid schema data', () => {
@@ -101,6 +102,53 @@ describe('CharacterRegistry core', () => {
     );
   });
 
+  test('rejects legacy prompt building segments', () => {
+    assert.throws(
+      () => {
+        CharacterRegistry.fromData(ROOT_PATH, {
+          characters: {
+            mike: { names: ['Mike'] },
+          },
+          groups: {
+            g1: {
+              characters: ['mike'],
+              prompt_building: {
+                segments: {
+                  style: ['legacy group style'],
+                },
+              },
+              sheets: {
+                s1: { path: 'p1', summary: 'd1' },
+              },
+            },
+          },
+        });
+      },
+      { name: 'ZodError' }
+    );
+  });
+
+  test('rejects legacy sheet description', () => {
+    assert.throws(
+      () => {
+        CharacterRegistry.fromData(ROOT_PATH, {
+          characters: {
+            mike: { names: ['Mike'] },
+          },
+          groups: {
+            g1: {
+              characters: ['mike'],
+              sheets: {
+                s1: { path: 'p1', description: 'legacy sheet description' },
+              },
+            },
+          },
+        });
+      },
+      { name: 'ZodError' }
+    );
+  });
+
   test('returns undefined for non-existent IDs', () => {
     const registry = CharacterRegistry.fromData(ROOT_PATH, {
       characters: {
@@ -110,7 +158,7 @@ describe('CharacterRegistry core', () => {
         g1: {
           characters: ['mike'],
           sheets: {
-            s1: { path: 'p1', description: 'd1' },
+            s1: { path: 'p1', summary: 'd1' },
           },
         },
       },
@@ -134,7 +182,7 @@ describe('CharacterRegistry core', () => {
         g1: {
           characters: ['mike'],
           sheets: {
-            s1: { path: 'img.png', description: 'desc' },
+            s1: { path: 'img.png', summary: 'desc' },
           },
         },
       },
@@ -147,7 +195,7 @@ describe('CharacterRegistry core', () => {
     assert.ok(registry.getGroupSheets('g1')?.s1);
     assert.ok(resolvedPath?.endsWith('img.png'));
     assert.ok(path.isAbsolute(resolvedPath!));
-    assert.equal(combined?.description, 'desc');
+    assert.equal(combined?.summary, 'desc');
   });
 
   test('returns empty prompt building defaults when group and sheet omit them', () => {
@@ -159,7 +207,7 @@ describe('CharacterRegistry core', () => {
         g1: {
           characters: ['mike'],
           sheets: {
-            s1: { path: 'p1', description: 'd1' },
+            s1: { path: 'p1', summary: 'd1' },
           },
         },
       },
@@ -167,7 +215,7 @@ describe('CharacterRegistry core', () => {
     const merged = registry.getGroupSheetPromptBuilding('g1', 's1');
 
     assert.ok(merged);
-    assert.deepEqual(merged.segments, {});
+    assert.deepEqual(merged.descriptions, {});
     assert.deepEqual(merged.constraints, []);
     assert.deepEqual(merged.system_instructions, []);
   });
@@ -175,8 +223,8 @@ describe('CharacterRegistry core', () => {
   test('returns a cloned data snapshot', () => {
     const registry = CharacterRegistry.empty(ROOT_PATH);
     registry.addCharacter('new_char', { names: ['New Character'], characteristics: ['cool'] });
-    registry.addGroup('new_group', { characters: ['new_char'], prompt_building: { segments: {}, constraints: [], system_instructions: [] } });
-    registry.addSheetToGroup('new_group', 'new_sheet', { path: 'new.png', description: 'New Sheet' });
+    registry.addGroup('new_group', { characters: ['new_char'], prompt_building: { descriptions: {}, constraints: [], system_instructions: [] } });
+    registry.addSheetToGroup('new_group', 'new_sheet', { path: 'new.png', summary: 'New Sheet' });
 
     const data = registry.toData();
     data.characters.new_char.names[0] = 'Mutated';

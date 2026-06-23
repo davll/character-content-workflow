@@ -98,7 +98,7 @@ groups:
     sheets:
       navy_uniform:
         path: sheets/mike_x_hiroshi-navy_uniforms.png
-        description: Character sheet for Mikhail Oryol and Hiroshi Amano, they are wearing navy uniforms.
+        summary: Character sheet for Mikhail Oryol and Hiroshi Amano, they are wearing navy uniforms.
 ```
 
 The generation skills use the registry to find character sheets, preserve character identity, and build safer prompts for illustrations and stickers.

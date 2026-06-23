@@ -36,7 +36,7 @@ describe('CharacterRegistry validation', () => {
             g1: {
               characters: ['mike'],
               sheets: {
-                s1: { path: '../outside.png', description: 'bad' },
+                s1: { path: '../outside.png', summary: 'bad' },
               },
             },
           },
@@ -51,7 +51,7 @@ describe('CharacterRegistry validation', () => {
 
     assert.throws(
       () => {
-        registry.addSheetToGroup('g1', 's1', { path: path.resolve(ROOT_PATH, 'absolute.png'), description: 'bad' });
+        registry.addSheetToGroup('g1', 's1', { path: path.resolve(ROOT_PATH, 'absolute.png'), summary: 'bad' });
       },
       /path must be relative/
     );
@@ -90,17 +90,17 @@ describe('CharacterRegistry validation', () => {
     const registry = CharacterRegistry.empty(ROOT_PATH);
     registry.addCharacter('mike', { names: ['Mike'] });
     registry.addGroup('g1', { characters: ['mike'] });
-    registry.addSheetToGroup('g1', 's1', { path: 'img.png', description: 'desc' });
+    registry.addSheetToGroup('g1', 's1', { path: 'img.png', summary: 'desc' });
 
     registry.getAllCharacters().mike.names[0] = 'Mutated';
     registry.getAllGroups().g1.characters.push('ghost');
     registry.getCharacter('mike')!.names[0] = 'Mutated again';
-    registry.getGroup('g1')!.sheets.s1.description = 'changed';
-    registry.getGroupSheets('g1')!.s1.description = 'changed again';
+    registry.getGroup('g1')!.sheets.s1.summary = 'changed';
+    registry.getGroupSheets('g1')!.s1.summary = 'changed again';
 
     assert.equal(registry.getCharacter('mike')?.names[0], 'Mike');
     assert.deepEqual(registry.getGroup('g1')?.characters, ['mike']);
-    assert.equal(registry.getGroupSheets('g1')?.s1.description, 'desc');
+    assert.equal(registry.getGroupSheets('g1')?.s1.summary, 'desc');
   });
 
   test('failed group mutation does not change registry state', () => {
@@ -133,7 +133,7 @@ describe('CharacterRegistry validation', () => {
 
     assert.throws(
       () => {
-        registry.addSheetToGroup('g1', 's1', { path: '../outside.png', description: 'bad' });
+        registry.addSheetToGroup('g1', 's1', { path: '../outside.png', summary: 'bad' });
       },
       /path must stay inside the registry root/
     );

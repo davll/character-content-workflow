@@ -17,7 +17,7 @@ groups:
     sheets:
       base:
         path: groups/mike_and_hiroshi/sheets/base/mike_x_hiroshi-base.png
-        description: Base version
+        summary: Base version
       navy_uniform:
         path: groups/mike_and_hiroshi/sheets/outfits/mike_and_hiroshi-navy_uniform.png
-        description: Navy uniform version
+        summary: Navy uniform version

@@ -63,7 +63,7 @@ Use the `character-registry` skill to validate the registry, then list all regis
 
 Inference rules:
 
-1. Identify the target character group from character names, group composition, and sheet descriptions returned by `character-registry list-all`.
+1. Identify the target character group from character names, group composition, and sheet summaries returned by `character-registry list-all`.
 2. Select a suitable dressed/outfit sheet for stickers from the listed sheets. Avoid base/naked/minimal sheets unless the user explicitly requests them or no dressed sheet exists.
 3. Prefer explicit prompt keywords for character, outfit, action, style, and caption.
 4. Choose `chibi` for cute, SD, mascot, LINE-like, exaggerated, or chibi requests. Choose `standard` for normal anime proportions or when the user explicitly asks for standard style.
@@ -78,8 +78,8 @@ After inference, verify the selected sheet by running `get-sheet-path`. Fail bef
 
 Use `get-sheet-path` as the selected reference image path. Use `get-sheet-info` to load the selected sheet's prompt-building data:
 
-- sheet description
-- `prompt_building.segments`
+- sheet summary
+- `prompt_building.descriptions`
 - `prompt_building.constraints`
 - `prompt_building.system_instructions`
 
@@ -104,7 +104,7 @@ Generate a sticker sheet matrix featuring the character from the 1st input image
 Then append:
 
 ```text
-Character Description: <sheet/group description and key registry character description>
+Character Summary: <sheet/group summary and key registry character traits>
 Sticker Concept: <inferred action>
 Caption Text: <caption, only if non-null>
 
@@ -121,7 +121,7 @@ Visual Constraints:
 - <each registry constraint>
 
 Character Traits (from registry):
-- <flattened registry segments>
+- <flattened registry descriptions>
 
 Character Instructions (from registry):
 - <each registry system instruction>

@@ -37,7 +37,7 @@ Before creating or modifying registry YAML, read `references/registry_schema.md`
    - `characters`: character IDs, display names, aliases, and durable visual/personality characteristics.
    - `groups`: single-character or multi-character groups that the user is asking to use together.
    - `sheets`: only add a sheet when the prompt or workspace context gives a concrete existing character sheet image path.
-   - `prompt_building`: include reusable prompt segments, constraints, and system instructions when they are explicit or strongly implied by the user request.
+   - `prompt_building`: include reusable semantic descriptions, constraints, and system instructions when they are explicit or strongly implied by the user request.
 2. Write `characters/index.yaml` with valid registry YAML.
 3. Run `validate` immediately after writing the file.
 4. If the prompt does not provide enough information for a valid sheet path, create only the safe character and group entries, report that a character sheet image path is needed, and stop before image generation.
@@ -67,16 +67,16 @@ groups:
     sheets:
       default:
         path: sheets/mike-default.png
-        description: Full-body reference sheet for Mike in his default outfit.
+        summary: Full-body reference sheet for Mike in his default outfit.
         prompt_building:
-          segments:
+          descriptions:
             character:
               - Mike, red hair, tall build
           constraints:
             - Preserve Mike's facial structure, hair color, and body proportions.
           system_instructions: []
     prompt_building:
-      segments: {}
+      descriptions: {}
       constraints: []
       system_instructions: []
 ```
@@ -113,7 +113,7 @@ node <this-skill-directory>/scripts/character-registry.mjs get-sheet-info --file
 2. Validate the registry before using sheet IDs in sticker, illustration, or image workflows.
 3. Use `list-all` for character/group/sheet selection instead of parsing `characters/index.yaml` manually.
 4. Use `get-sheet-path` for reference image paths passed to image-generation workflows.
-5. Use `get-sheet-info` for prompt-building data, including sheet description, `prompt_building.segments`, `prompt_building.constraints`, and `prompt_building.system_instructions`.
+5. Use `get-sheet-info` for prompt-building data, including sheet summary, `prompt_building.descriptions`, `prompt_building.constraints`, and `prompt_building.system_instructions`.
 6. Treat non-zero CLI exits as workflow failures. Report the command error and stop before generating images.
 7. If the user provides a custom registry path, pass that same `--file` value to every command in the workflow.
 8. When asked to create, repair, or modify registry YAML, read `references/registry_schema.md` before editing and validate the registry immediately after writing.

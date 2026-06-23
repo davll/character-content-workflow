@@ -19,14 +19,14 @@ groups:
   g1:
     characters: ["mike"]
     sheets:
-      s1: { path: "img.png", description: "desc" }
+      s1: { path: "img.png", summary: "desc" }
 `);
 
     const registry = await loadCharacterRegistryFromFile(workspace.yamlPath);
 
     assert.equal(registry.rootPath, path.resolve(workspace.rootPath));
     assert.equal(registry.getCharacter('mike')?.names[0], 'Mike');
-    assert.equal(registry.getGroupSheets('g1')?.s1.description, 'desc');
+    assert.equal(registry.getGroupSheets('g1')?.s1.summary, 'desc');
   });
 
   test('saves a registry to YAML and creates target directories', async (t) => {
@@ -34,7 +34,7 @@ groups:
     const registry = CharacterRegistry.empty(workspace.rootPath);
     registry.addCharacter('mike', { names: ['Mike'] });
     registry.addGroup('g1', { characters: ['mike'] });
-    registry.addSheetToGroup('g1', 's1', { path: 'img.png', description: 'desc' });
+    registry.addSheetToGroup('g1', 's1', { path: 'img.png', summary: 'desc' });
 
     const savePath = path.join(workspace.rootPath, 'nested', 'index.yaml');
     await saveCharacterRegistryToFile(registry, savePath);
@@ -49,7 +49,7 @@ groups:
     const registry = await CharacterRegistry.init(workspace.yamlPath);
     registry.addCharacter('new_char', { names: ['New Character'], characteristics: ['cool'] });
     registry.addGroup('new_group', { characters: ['new_char'] });
-    registry.addSheetToGroup('new_group', 'new_sheet', { path: 'new.png', description: 'New Sheet' });
+    registry.addSheetToGroup('new_group', 'new_sheet', { path: 'new.png', summary: 'New Sheet' });
     await registry.saveToFile();
 
     const saved = await fs.readFile(workspace.yamlPath, 'utf8');

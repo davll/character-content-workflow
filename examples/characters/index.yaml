@@ -14,7 +14,32 @@ characters:
 groups:
   mike_and_hiroshi:
     characters: [mike, hiroshi]
+    prompt_building:
+      descriptions:
+        style:
+          - Clean anime reference-sheet rendering with crisp linework and bright, high-contrast colors.
+          - Character art follows an Akira Toriyama-inspired style, especially the facial feature shapes.
+        relationship:
+          - Mikhail Oryol and Hiroshi Amano are a paired two-character group and should remain visually distinct from each other.
+        characteristics:
+          - Mikhail Oryol is the taller character with blond hair, blue eyes, a broad build, and light facial hair.
+          - Hiroshi Amano is the shorter character with dark brown hair, dark eyes, a compact build, and light facial hair.
+      constraints:
+        - Preserve the height relationship between Mikhail Oryol and Hiroshi Amano.
+        - Do not swap Mikhail and Hiroshi's faces, hair colors, body proportions, or identities.
+      system_instructions:
+        - Treat this combined group as the source of truth for the two characters together.
     sheets:
       navy_uniform:
         path: sheets/mike_x_hiroshi-navy_uniforms.png
-        description: Character sheet for Mikhail Oryol and Hiroshi Amano, they are wearing navy uniforms.
+        summary: Character sheet for Mikhail Oryol and Hiroshi Amano, they are wearing navy uniforms.
+        prompt_building:
+          descriptions:
+            outfit_details:
+              - Mikhail Oryol and Hiroshi Amano both wear white naval dress uniforms with black shoulder boards, gold trim, gold buttons, chest insignia, medals, white trousers, and black dress shoes.
+              - Mikhail's uniform and Hiroshi's uniform share the same naval dress style while preserving each character's separate proportions and fit.
+            reference_logic:
+              - Use this combined sheet for both characters' identities, relative scale, body proportions, facial distinctions, and naval uniform ownership.
+          constraints:
+            - Do not swap the characters' uniforms, insignia placement, height relationship, or body proportions.
+          system_instructions: []

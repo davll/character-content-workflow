@@ -16,7 +16,7 @@ describe('CharacterRegistryService', () => {
 
     await assert.rejects(
       async () => {
-        await service.attachSheet('g1', 's1', { description: 'missing image and path' });
+        await service.attachSheet('g1', 's1', { summary: 'missing image and path' });
       },
       /without a path or source image/
     );
@@ -31,7 +31,7 @@ describe('CharacterRegistryService', () => {
     registry.addGroup('g1', { characters: ['mike'] });
     const service = new CharacterRegistryService(registry);
 
-    await service.attachSheet('g1', 's1', { description: 'copied image' }, workspace.sourceImagePath);
+    await service.attachSheet('g1', 's1', { summary: 'copied image' }, workspace.sourceImagePath);
 
     const sheet = registry.getGroupSheets('g1')?.s1;
     assert.equal(sheet?.path, 'groups/g1/sheets/outfits/g1_s1.png');
@@ -50,7 +50,7 @@ describe('CharacterRegistryService', () => {
 
     await assert.rejects(
       async () => {
-        await service.attachSheet('g1', 's1', { description: 'unsupported image' }, webpPath);
+        await service.attachSheet('g1', 's1', { summary: 'unsupported image' }, webpPath);
       },
       /Only JPEG and PNG are supported/
     );
@@ -69,7 +69,7 @@ describe('CharacterRegistryService', () => {
 
     await assert.rejects(
       async () => {
-        await service.attachSheet('g1', '../bad', { description: 'bad id' }, workspace.sourceImagePath);
+        await service.attachSheet('g1', '../bad', { summary: 'bad id' }, workspace.sourceImagePath);
       },
       /IDs may only contain/
     );
@@ -97,9 +97,9 @@ describe('CharacterRegistryService', () => {
           'g1',
           's1',
           {
-            description: 'invalid prompt building',
+            summary: 'invalid prompt building',
             prompt_building: {
-              segments: {
+              descriptions: {
                 style: 'not an array',
               },
             },
