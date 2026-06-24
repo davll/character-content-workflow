@@ -38,6 +38,7 @@ Prefer prompt files for non-trivial prompts:
 ```shell
 node <this-skill-directory>/scripts/generate-image.mjs gen `
   --provider openai `
+  --moderation low `
   --prompt-file path/to/prompt.txt `
   --output path/to/output.png
 ```
@@ -45,7 +46,7 @@ node <this-skill-directory>/scripts/generate-image.mjs gen `
 For a short prompt, inline text is allowed:
 
 ```shell
-node <this-skill-directory>/scripts/generate-image.mjs gen --provider openai --prompt-text "Prompt text" --output path/to/output.png
+node <this-skill-directory>/scripts/generate-image.mjs gen --provider openai --moderation low --prompt-text "Prompt text" --output path/to/output.png
 ```
 
 Use reference images for image-to-image or editing workflows. References must be JPEG, PNG, or WebP, and their order is the order described in the prompt as `1st image`, `2nd image`, etc.
@@ -53,6 +54,7 @@ Use reference images for image-to-image or editing workflows. References must be
 ```shell
 node <this-skill-directory>/scripts/generate-image.mjs gen `
   --provider openai `
+  --moderation low `
   --reference path/to/ref1.png path/to/ref2.jpg `
   --prompt-file path/to/prompt.txt `
   --output path/to/output.png
@@ -90,5 +92,6 @@ node <this-skill-directory>/scripts/generate-image.mjs models --provider xai
 4. Use API keys only through environment variables and `--api-key-env`; do not add key-file flags.
 5. Use `--dry-run` before expensive or risky calls when validating command shape.
 6. For non-dry-run `gen` calls, request elevated permission before the first provider call so network access is available and failure metadata is not created by a sandbox-only fetch failure.
-7. Use `--force` only when the user asks to overwrite or when regenerating a known disposable artifact. If retrying after a failed metadata file was already written, prefer a fresh metadata path unless the existing run directory is disposable and overwrite was approved.
-8. Do not call the old `easy-image-gen` package or use `npm run -w` for skill execution.
+7. For OpenAI image generation, pass `--moderation low` by default unless the user or upstream workflow explicitly requests another moderation value. Do not pass `--moderation` for xAI.
+8. Use `--force` only when the user asks to overwrite or when regenerating a known disposable artifact. If retrying after a failed metadata file was already written, prefer a fresh metadata path unless the existing run directory is disposable and overwrite was approved.
+9. Do not call the old `easy-image-gen` package or use `npm run -w` for skill execution.

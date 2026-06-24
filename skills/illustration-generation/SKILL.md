@@ -200,6 +200,7 @@ Prompt-building rules:
 7. Derive the Reference Guide from the final resolved reference sequence. Do not invent, omit, or reorder reference guide entries during prose writing.
 8. The Reference Guide must contain exactly one line per reference, in the same order as the handoff reference list.
 9. If any registry `prompt_building.descriptions` item is omitted, softened, generalized, or materially rephrased, record a warning in the workflow output explaining the original registry text, the changed prompt text, and the reason. Do not silently alter registry semantics.
+10. Do not add unsolicited softening, sanitizing, or tone-limiting language such as "non-explicit", "not eroticized", "suitable", "tasteful", or equivalent wording when the user did not request it and no higher-priority safety policy requires it. If such a policy-based change is required, keep the change as narrow as possible and record a warning explaining the exact registry or user-prompt wording that was changed.
 
 Reference guide role formats:
 
