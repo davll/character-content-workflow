@@ -143,6 +143,14 @@ Before prompt building, validate:
 
 Build one final image prompt using the selected references. Follow registry `system_instructions`, use `descriptions` as semantic content building blocks, and enforce every registry `constraint`.
 
+## Registry Prompt-Building Fidelity
+
+Treat registry `prompt_building.descriptions`, `constraints`, and `system_instructions` as source-of-truth semantic content.
+
+The prompt builder may reorganize wording for readability, merge duplicate ideas, and adapt phrasing into the final prompt structure, but must not weaken, omit, sanitize, generalize, or contradict registry-provided character facts, outfit details, body traits, identity details, relationship logic, or constraints.
+
+If a registry description is explicit, preserve its explicitness unless it directly conflicts with a higher-priority safety policy or with another registry constraint. In that case, add a warning explaining which registry text was changed and why.
+
 ## Character Consistency Guardrails
 
 Apply these rules to every prompt before writing the final artifact:
@@ -183,7 +191,7 @@ Character Instructions:
 
 Prompt-building rules:
 
-1. Apply the minimal description principle: rely on registry sheets for stable visual traits. Repeat hair, eye, body, clothing, or accessory details only when needed for the scene or a registry constraint.
+1. Apply the minimal description principle only to avoid unnecessary duplication, not to remove registry facts. Rely on registry sheets for stable visual traits, but preserve explicit registry `descriptions`, especially character identity, outfit ownership, body traits, relationship logic, and constraints. Do not weaken specific registry wording into vague references such as "same fit" or "as shown" when the registry provides an explicit semantic detail.
 2. Constraints take precedence over generic scene expansion. If a constraint defines height, skin tone contrast, outfit ownership, or relationship logic, explicitly encode that logic.
 3. Use spatial safety for multi-character scenes: state left/right, foreground/background, who touches whom, who looks at whom, and which outfit belongs to which character.
 4. Use cinematic language: concrete camera angle, focal length feel, lighting direction, atmosphere, and background details.
@@ -191,6 +199,7 @@ Prompt-building rules:
 6. Keep the prompt as a generation prompt, not a reasoning trace. Do not mention registry commands, local file paths, or internal inference.
 7. Derive the Reference Guide from the final resolved reference sequence. Do not invent, omit, or reorder reference guide entries during prose writing.
 8. The Reference Guide must contain exactly one line per reference, in the same order as the handoff reference list.
+9. If any registry `prompt_building.descriptions` item is omitted, softened, generalized, or materially rephrased, record a warning in the workflow output explaining the original registry text, the changed prompt text, and the reason. Do not silently alter registry semantics.
 
 Reference guide role formats:
 
