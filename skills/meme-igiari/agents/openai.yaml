@@ -1,0 +1,4 @@
+interface:
+  display_name: "Meme Igiari"
+  short_description: "Objection pose meme prompt"
+  default_prompt: "Use $meme/igiari with a registered character."
