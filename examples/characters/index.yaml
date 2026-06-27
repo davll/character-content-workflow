@@ -11,6 +11,9 @@ characters:
       - Hiroshi Amano
       - 天野宏
       - あまの ひろし
+  juan_lopez:
+    names:
+      - Juan Lopez
 groups:
   mike_and_hiroshi:
     characters: [mike, hiroshi]
@@ -42,4 +45,29 @@ groups:
               - Use this combined sheet for both characters' identities, relative scale, body proportions, facial distinctions, and naval uniform ownership.
           constraints:
             - Do not swap the characters' uniforms, insignia placement, height relationship, or body proportions.
+          system_instructions: []
+  juan_lopez:
+    characters: [juan_lopez]
+    prompt_building:
+      descriptions:
+        style:
+          - Clean anime reference-sheet rendering with crisp linework and bright, high-contrast colors.
+          - Character art follows an Akira Toriyama-inspired style, especially the facial feature shapes.
+        characteristics:
+          - Juan Lopez is a Mexican military man with a short military flat-top haircut, dark hair, warm medium-brown skin, a stern expression, a strong jaw, a goatee, and visible black-ink tattoos.
+      constraints:
+        - Preserve Juan Lopez's short flat-top haircut, goatee, skin tone, tattoos, facial structure, and military bearing.
+      system_instructions: []
+    sheets:
+      default:
+        path: sheets/mexican_soldier_sheet.png
+        summary: Character sheet for Juan Lopez, a Mexican military man in a white naval-style dress uniform.
+        prompt_building:
+          descriptions:
+            outfit_details:
+              - Juan Lopez wears a white naval-style dress uniform with black shoulder boards, gold trim, gold buttons, chest insignia, medals, white trousers, and black dress shoes.
+            reference_logic:
+              - Use this sheet as the source of truth for Juan Lopez's identity, body proportions, facial features, tattoos, and uniform.
+          constraints:
+            - Do not remove Juan Lopez's tattoos, goatee, short flat-top haircut, or white military uniform.
           system_instructions: []
