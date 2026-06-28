@@ -134,7 +134,7 @@ objects:
       - Do not draw the Leica M4 as a bulky SLR, DSLR, or camera with a prism hump.
 ```
 
-Illustration workflows use the object registry after character selection to preserve prop design, scale, accessories, usage posture, and reference-image ordering without overriding character identity or outfit ownership.
+Illustration workflows and object-aware character sheet variant workflows use the object registry after character selection to preserve prop design, scale, accessories, usage posture, and reference-image ordering without overriding character identity or outfit ownership.
 
 ## Example Requests
 
