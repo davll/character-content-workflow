@@ -1,0 +1,144 @@
+styles:
+  paper_craft:
+    names:
+      - paper craft
+      - paper cutout
+      - layered paper craft
+      - 紙雕
+      - 紙藝
+      - 剪紙風
+    summary: Soft cute layered paper craft style with simplified handcrafted shapes.
+    prompt_building:
+      descriptions:
+        rendering:
+          - Layered cut-paper construction with visible paper fibers and softly rounded edges.
+          - Simplified handcrafted shapes with decorative dimensional cutout layering.
+        texture:
+          - Tactile paper texture, subtle fibers, stacked paper depth, and clean cut edges.
+        line_quality:
+          - Minimal ink lines, soft contour separation, and gentle handcrafted silhouette edges.
+        palette:
+          - Warm cheerful colors with soft contrast and charming decorative accents.
+        lighting:
+          - Warm gentle lighting with soft shadows between paper layers.
+        mood:
+          - Soft, cute, charming, visually pleasing, and handcrafted.
+      constraints:
+        - Preserve character identity, outfit ownership, body proportions, skin tone contrast, and important visible markings while simplifying fine detail.
+        - Do not turn the image into flat vector art; keep tactile paper texture and layered dimensionality.
+      system_instructions:
+        - Apply style instructions after character identity and outfit constraints.
+        - Simplify only rendering complexity, not identity-critical character details.
+  detailed_digital_anime:
+    names:
+      - detailed digital anime
+      - anime illustration
+      - polished anime
+      - 精緻動漫風
+      - 日系動畫風
+    summary: Polished detailed digital anime style with clean character rendering and rich scene finish.
+    prompt_building:
+      descriptions:
+        rendering:
+          - High-quality digital anime illustration with clean forms and polished character rendering.
+          - Detailed but readable rendering that keeps faces, hair, outfits, and accessories crisp.
+        line_quality:
+          - Clean confident line art with controlled detail and expressive contours.
+        palette:
+          - Appealing saturated colors balanced with natural skin tones and clear material separation.
+        lighting:
+          - Cinematic but readable lighting with soft gradients, highlights, and atmospheric depth.
+        mood:
+          - Expressive, vivid, polished, and character-focused.
+      constraints:
+        - Do not over-stylize faces, proportions, outfits, or identity-critical markings away from the character registry.
+        - Avoid muddy lighting that obscures character identity or outfit ownership.
+      system_instructions:
+        - Use this as a general rendering style only; character registry data remains the identity source of truth.
+  watercolor_storybook:
+    names:
+      - watercolor
+      - storybook watercolor
+      - watercolor storybook
+      - 水彩
+      - 水彩繪本
+      - 繪本水彩風
+    summary: Gentle watercolor storybook style with soft washes, warm texture, and illustrative charm.
+    prompt_building:
+      descriptions:
+        rendering:
+          - Gentle watercolor storybook illustration with translucent washes and softly layered color.
+          - Hand-painted charm with simplified edges and warm narrative atmosphere.
+        texture:
+          - Visible watercolor paper grain, pigment blooms, and soft wash transitions.
+        line_quality:
+          - Light sketch-like outlines or softened edges that support readable character shapes.
+        palette:
+          - Warm harmonious palette with delicate color variation and low harshness.
+        lighting:
+          - Diffused natural lighting with tender highlights and calm shadow shapes.
+        mood:
+          - Gentle, nostalgic, cozy, and emotionally warm.
+      constraints:
+        - Preserve identity-critical facial features, outfits, proportions, and markings even when edges become softer.
+        - Do not let watercolor bleeding merge separate characters, accessories, or outfit ownership.
+      system_instructions:
+        - Use watercolor softness for rendering and atmosphere, not for weakening registry constraints.
+  retro_manga:
+    names:
+      - retro manga
+      - classic manga
+      - vintage manga
+      - 復古漫畫
+      - 昭和漫畫風
+      - 老漫畫風
+    summary: Retro manga style with bold ink, screen tones, expressive composition, and vintage print texture.
+    prompt_building:
+      descriptions:
+        rendering:
+          - Classic retro manga illustration with bold ink shapes, controlled hatching, and screen tone shading.
+          - Vintage print feel with expressive faces, dramatic staging, and readable black-and-white contrast.
+        texture:
+          - Subtle aged print texture, halftone dots, and screen tone grain.
+        line_quality:
+          - Bold expressive linework with confident contours and selective crosshatching.
+        palette:
+          - Mostly monochrome or limited vintage color accents unless the user asks for full color.
+        lighting:
+          - Graphic high-contrast light and shadow with dramatic emphasis.
+        mood:
+          - Nostalgic, energetic, theatrical, and manga-panel-like.
+      constraints:
+        - Preserve character identity, outfit ownership, proportions, and important markings despite manga abstraction.
+        - Do not add speech bubbles, panel borders, title text, or printed captions unless explicitly requested.
+      system_instructions:
+        - Treat retro manga as the rendering treatment; scene action and character registry constraints remain higher priority.
+  cute_picture_book:
+    names:
+      - cute picture book
+      - children's picture book
+      - cute storybook
+      - 可愛繪本
+      - 童書風
+      - 溫馨繪本風
+    summary: Cute picture book style with simplified friendly shapes, soft colors, and warm storybook appeal.
+    prompt_building:
+      descriptions:
+        rendering:
+          - Cute picture book illustration with simplified friendly shapes and soft approachable detail.
+          - Rounded forms, gentle expressions, and decorative storybook charm.
+        texture:
+          - Soft painted or crayon-like texture with mild paper grain and handmade warmth.
+        line_quality:
+          - Rounded gentle outlines with readable silhouettes and minimal sharpness.
+        palette:
+          - Soft bright colors, warm accents, and cozy low-contrast harmony.
+        lighting:
+          - Cheerful soft lighting that keeps characters clear and inviting.
+        mood:
+          - Cute, wholesome, cozy, playful, and warm.
+      constraints:
+        - Simplify surface detail without changing character identity, outfit ownership, body proportions, or important visible markings.
+        - Do not make adult characters look like different child characters unless explicitly requested.
+      system_instructions:
+        - Keep the picture book treatment secondary to registry identity and outfit constraints.

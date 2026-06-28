@@ -9,6 +9,7 @@
     "build:skill": "tsx scripts/build-skills.ts",
     "build:generate-image-skill": "tsx scripts/build-generate-image-skill.ts",
     "build:character-registry-skill": "tsx scripts/build-character-registry-skill.ts",
+    "build:style-registry-skill": "tsx scripts/build-style-registry-skill.ts",
     "sync:agents-skills": "tsx scripts/sync-agents-skills.ts",
     "build": "npm --workspaces run build",
     "test": "npm --workspaces run test --if-present"

@@ -4,20 +4,22 @@ description: Generate character-consistent illustrations from registered charact
 ---
 # Illustration Generation
 
-Run the illustration workflow in this skill. Use the `character-registry` skill for registry validation, sheet selection, sheet paths, and prompt-building data. Use the `image-generation` skill for final rendering, dry-run validation, provider behavior, API key handling, and CLI command shape.
+Run the illustration workflow in this skill. Use the `character-registry` skill for registry validation, sheet selection, sheet paths, and character prompt-building data. Use the `style-registry` skill for visual style inference and style prompt-building data. Use the `image-generation` skill for final rendering, dry-run validation, provider behavior, API key handling, and CLI command shape.
 
 This skill owns only the orchestration contract:
 
 1. Interpret the user request as an illustration scene.
-2. Select character sheet references from the registry.
-3. Normalize external references into one ordered handoff list.
-4. Build a prompt whose Reference Guide exactly matches that list.
-5. Create durable illustration artifacts.
-6. Hand off rendering to `image-generation`.
+2. Select character sheet references from the character registry.
+3. Infer an optional text-only style profile from the style registry.
+4. Normalize external references into one ordered handoff list.
+5. Build a prompt whose Reference Guide exactly matches that list.
+6. Create durable illustration artifacts.
+7. Hand off rendering to `image-generation`.
 
 ## Defaults
 
-- Registry: `characters/index.yaml`
+- Character Registry: `characters/index.yaml` when present; `examples/characters/index.yaml` only as the local development fixture fallback
+- Style registry: `styles/index.yaml` when present; `examples/styles/index.yaml` only as the local development fixture fallback
 - Output directory: `output/illustrations`
 - Image provider preference: `openai` unless the user requests another provider
 - Image model preference: omit unless requested
@@ -37,6 +39,7 @@ Fail before writing the final prompt or generating an image when any invariant c
 8. The final prompt's Reference Guide must have exactly one line per handoff reference, in the exact handoff order.
 9. No local filesystem path may appear in the prompt text.
 10. The image-generation handoff must include explicit prompt, output image, ordered references, and metadata paths.
+11. Style registry entries are text-only and must not add Reference Guide lines or image-generation reference paths.
 
 ## Registry Resolution
 
@@ -48,6 +51,18 @@ Resolve the registry path before calling `character-registry`:
 4. Create `characters/index.yaml` through the `character-registry` first-use workflow only when no usable registry candidate exists.
 
 If the registry path is overridden, pass that path through every registry lookup.
+
+## Style Registry Resolution
+
+Resolve the style registry path before calling `style-registry`:
+
+1. Use an explicit user-provided style registry path when supplied.
+2. Otherwise use `styles/index.yaml` when it exists.
+3. Otherwise, when running inside this skill development repository, use `examples/styles/index.yaml` when it exists.
+4. If no usable style registry exists and no style was explicitly requested, set `selected_style` to `null` and continue.
+5. If no usable style registry exists and the user explicitly requested a named registry style, report the missing style registry and stop before writing image outputs.
+
+If the style registry path is overridden, pass that path through every style-registry lookup.
 
 ## External References
 
@@ -74,14 +89,19 @@ Do not use paths from previous turns unless the user explicitly repeats them in 
 Resolve the request into:
 
 - `user_prompt`: non-empty illustration request.
+- `style_cues`: style words, aliases, or preservation requests from the prompt, such as "paper craft style", "水彩繪本風", "retro manga", "cute chibi", "厚塗", or "保持原本 anime style".
 - `external_inputs`: explicit JPEG/PNG paths and current-turn uploaded image paths, in user-supplied order.
 - `handoff_options`: provider, model, size, aspect ratio, resolution, overwrite, dry-run, and verbosity, only when requested or needed by this workflow.
 
 Validate that each external input has an explicit source path. Defer durable copying until Stage 4, after the run directory exists.
 
+Do not remove style cues from the user prompt. Keep them available for scene inference, external reference role classification, and style profile matching.
+
 ### Stage 2: Registry Selection
 
 Use `character-registry` to validate the registry and list all registry summaries. Infer selected character sheets from the registry output and the user prompt.
+
+Do not rely on `prompt_building.descriptions.style` from the character registry as the main style source. If those legacy fields exist, treat them only as low-priority default hints when no explicit user style or style registry profile is selected.
 
 Selection heuristics:
 
@@ -98,7 +118,23 @@ For every selected sheet:
 3. Load prompt-building data with `get-sheet-info`.
 4. Use sheet summary, `prompt_building.descriptions`, `prompt_building.constraints`, and `prompt_building.system_instructions`.
 
-### Stage 3: Scene And Reference Plan
+### Stage 3: Scene And Style Plan
+
+After scene inference and character sheet selection, resolve optional style data:
+
+1. If a style registry candidate exists, validate it with `style-registry`.
+2. Run `list-all` and infer a selected style from the user prompt, `style_cues`, style IDs, aliases, and summaries.
+3. If a style matches, call `get-style-info` and store the pathless prompt-building data in `selected_style.prompt_data`.
+4. If the user explicitly requested a named style and it cannot be resolved, treat this as a workflow failure before writing image outputs.
+5. If no style was requested or no registry file exists, set `selected_style` to `null` and continue with this workflow's existing default style behavior.
+
+Style precedence:
+
+```text
+explicit user style text > uploaded style reference image > selected style registry profile > default style
+```
+
+If user provides both a style registry cue and a style reference image, use the style registry for reusable prompt vocabulary. Use the external style image only for broad rendering style, line quality, color mood, or lighting treatment. Neither source may override character identity, outfit ownership, proportions, markings, or explicit scene action.
 
 Infer a compact scene plan from the prompt, selected sheets, external inputs, and warnings:
 
@@ -110,6 +146,15 @@ Infer a compact scene plan from the prompt, selected sheets, external inputs, an
     "action": "<core action or interaction>",
     "mood": "<emotional tone>",
     "composition": "<camera and layout intent>"
+  },
+  "selected_style": {
+    "id": "style:<style_id>",
+    "style_id": "<style id>",
+    "target": "whole image",
+    "role": "rendering style and visual treatment",
+    "confidence": 0.0,
+    "reason": "<why this style was selected>",
+    "prompt_data": "<style prompt-building data without paths>"
   },
   "selected_sheets": [
     {
@@ -135,6 +180,12 @@ Infer a compact scene plan from the prompt, selected sheets, external inputs, an
   ],
   "warnings": []
 }
+```
+
+If no style is matched:
+
+```json
+"selected_style": null
 ```
 
 External-reference planning rules:
@@ -181,6 +232,8 @@ Reference ordering:
 2. External references next, preserving the user-supplied external-reference order.
 3. Change external order only when the user explicitly requests a different order.
 
+Style registry profiles are text-only. Do not add them to this reference ordering, do not create a `Reference Guide` line for them, and do not pass them as image-generation references unless a separate actual image reference exists.
+
 External path normalization:
 
 1. Verify every external source path exists and is JPEG or PNG by content signature before deciding whether to preserve or copy it.
@@ -225,7 +278,7 @@ Canonical-list validation:
 
 ### Stage 5: Prompt Building
 
-Build one final image prompt from the scene plan, selected sheet prompt data, warnings, and canonical reference list. The prompt-building stage may use IDs, labels, kinds, roles, targets, descriptions, sheet summaries, and prompt-building data, but must not see or mention local filesystem paths.
+Build one final image prompt from the scene plan, selected sheet prompt data, selected style prompt data, warnings, and canonical reference list. The prompt-building stage may use IDs, labels, kinds, roles, targets, descriptions, sheet summaries, and prompt-building data, but must not see or mention local filesystem paths.
 
 #### Registry Prompt-Building Fidelity
 
@@ -246,14 +299,21 @@ Scene Direction:
 Character and Outfit Handling:
 <registry-derived traits and outfit details needed for correctness; do not over-describe details already clear in the registry sheets unless a constraint requires it>
 
+Style Direction:
+<style-registry-derived rendering, texture, line quality, palette, lighting, mood, and detail rules; keep style text out of Character and Outfit Handling>
+
 Composition:
 <camera angle, framing, spatial relationship, depth, lighting, and background>
 
 Visual Constraints:
 - <each registry constraint, rewritten into prompt-friendly language>
+- <each compatible style registry constraint, after character constraints>
 
 Character Instructions:
 - <each relevant registry system instruction>
+
+Style Instructions:
+- <each relevant style registry system instruction>
 
 ### Reference Guide:
 1st image: <role-specific instruction>
@@ -270,12 +330,16 @@ Prompt invariants:
 6. External pose, background, style, and prop references must not override registry character identity or clothing.
 7. Do not copy registry sheet layout artifacts: standing order, neutral pose, gray panels, divider lines, character name labels, annotation text, reference-sheet framing, or plain reference composition. Scene composition comes from the prompt unless the user explicitly asks to copy a sheet layout or pose.
 8. If the selected sheet is a combined group sheet, use it for all characters in that group and preserve the group's internal identity distinctions.
-9. Keep the prompt as a generation prompt, not a reasoning trace. Do not mention registry commands, local paths, or internal inference.
-10. Apply the minimal description principle only to avoid unnecessary duplication, not to remove registry facts. Rely on registry sheets for stable visual traits, but preserve explicit registry `descriptions`, especially character identity, outfit ownership, body traits, relationship logic, and constraints. Do not weaken specific registry wording into vague references such as "same fit" or "as shown" when the registry provides an explicit semantic detail.
-11. Avoid static portrait output unless requested. Add body language, eye contact, expression, interaction, or motion.
-12. Derive the Reference Guide from the canonical reference list. Do not invent, omit, or reorder guide entries during prose writing.
-13. If any registry `prompt_building.descriptions` item is omitted, softened, generalized, or materially rephrased, record a warning in the workflow output explaining the original registry text, the changed prompt text, and the reason. Do not silently alter registry semantics.
-14. Do not add unsolicited softening, sanitizing, or tone-limiting language such as "non-explicit", "not eroticized", "suitable", "tasteful", or equivalent wording when the user did not request it and no higher-priority safety policy requires it. If such a policy-based change is required, keep the change as narrow as possible and record a warning explaining the exact registry or user-prompt wording that was changed.
+9. Character registry constraints beat style registry constraints. Style may simplify rendering detail but must not erase identity-critical traits such as tattoos, skin tone contrast, outfit ownership, body proportions, or important markings.
+10. Place style profile descriptions in `Style Direction`, not `Character and Outfit Handling`.
+11. Style constraints appear after character constraints. Omit or narrow any style constraint that conflicts with character preservation and record a warning.
+12. Keep the prompt as a generation prompt, not a reasoning trace. Do not mention registry commands, local paths, or internal inference.
+13. Apply the minimal description principle only to avoid unnecessary duplication, not to remove registry facts. Rely on registry sheets for stable visual traits, but preserve explicit registry `descriptions`, especially character identity, outfit ownership, body traits, relationship logic, and constraints. Do not weaken specific registry wording into vague references such as "same fit" or "as shown" when the registry provides an explicit semantic detail.
+14. Avoid static portrait output unless requested. Add body language, eye contact, expression, interaction, or motion.
+15. Derive the Reference Guide from the canonical reference list. Do not invent, omit, or reorder guide entries during prose writing.
+16. Style profiles do not add extra Reference Guide lines.
+17. If any registry `prompt_building.descriptions` item is omitted, softened, generalized, or materially rephrased, record a warning in the workflow output explaining the original registry text, the changed prompt text, and the reason. Do not silently alter registry semantics.
+18. Do not add unsolicited softening, sanitizing, or tone-limiting language such as "non-explicit", "not eroticized", "suitable", "tasteful", or equivalent wording when the user did not request it and no higher-priority safety policy requires it. If such a policy-based change is required, keep the change as narrow as possible and record a warning explaining the exact registry or user-prompt wording that was changed.
 
 Reference guide role formats:
 

@@ -4,9 +4,10 @@ Character Content Workflow provides Codex skills for character-based creative wo
 
 ## Skills
 
-This repository includes four skills:
+This repository includes five skills:
 
 - `character-registry`: Query and validate character registry data, list available characters/groups/sheets, resolve sheet image paths, and load prompt-building data for generation workflows.
+- `style-registry`: Query and validate reusable visual style profiles for rendering, texture, line quality, palette mood, lighting, and style-specific prompt-building constraints.
 - `image-generation`: Generate or edit images with the bundled image generation CLI. It supports OpenAI and xAI providers through environment variables.
 - `illustration-generation`: Create character-consistent illustrations from registered character sheets and optional reference images.
 - `sticker-generation`: Create chat-style stickers, LINE/Telegram-style stickers, reaction stickers, chibi stickers, or sticker sheets from registered characters.
@@ -103,6 +104,10 @@ groups:
 
 The generation skills use the registry to find character sheets, preserve character identity, and build safer prompts for illustrations and stickers.
 
+## Style Registry
+
+Reusable visual style profiles are defined in a project-local `styles/index.yaml`. In this repository, seed examples live at [`examples/styles/index.yaml`](examples/styles/index.yaml), including `paper_craft`, `detailed_digital_anime`, `watercolor_storybook`, `retro_manga`, and `cute_picture_book`.
+
 ## Example Requests
 
 After installing the skills, you can ask Codex things like:
@@ -146,6 +151,7 @@ You can also rebuild specific bundled skill scripts:
 ```shell
 npm run build:generate-image-skill
 npm run build:character-registry-skill
+npm run build:style-registry-skill
 ```
 
 Sync built skills into `.agents/skills/` for local testing:

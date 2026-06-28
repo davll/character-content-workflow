@@ -1,0 +1,30 @@
+{
+  "name": "@davll/style-registry",
+  "version": "1.0.0",
+  "description": "TypeScript library for visual style prompt-building profiles",
+  "main": "src/index.ts",
+  "bin": {
+    "style-registry": "src/cli.ts"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "tsx --test tests/*.test.ts",
+    "reg": "node --experimental-strip-types src/cli.ts",
+    "reg:dev": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "commander": "^15.0.0",
+    "js-yaml": "^4.2.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.19.42",
+    "tsx": "^4.22.4",
+    "typescript": "^5.4.5"
+  }
+}
