@@ -1,6 +1,6 @@
 ---
 name: meme-death-pose
-description: Generate a character-consistent meme illustration inspired by the classic Yamcha-style death pose: one character lying face-down in a side-prone pose inside a circular crater after impact. Use when the user invokes $meme/death-pose or asks for one character in a Yamcha death pose / ヤムチャ死亡ポーズ / 飲茶死亡姿勢 scene, using this skill's template image as a strict face-down pose, back-facing-up body-layout, crater-composition, and impact-scene reference before handing off to illustration-generation.
+description: "Generate a character-consistent meme illustration inspired by the classic Yamcha-style death pose: one character lying face-down in a side-prone pose inside a circular crater after impact. Use when the user invokes $meme/death-pose or asks for one character in a Yamcha death pose / ヤムチャ死亡ポーズ / 飲茶死亡姿勢 scene, using this skill's template image as a strict face-down pose, back-facing-up body-layout, crater-composition, and impact-scene reference before handing off to illustration-generation."
 ---
 
 # Meme Death Pose
