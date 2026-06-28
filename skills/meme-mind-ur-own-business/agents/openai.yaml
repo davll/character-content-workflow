@@ -1,4 +1,0 @@
-interface:
-  display_name: "Meme Mind Ur Own Business"
-  short_description: "Pointing pressure meme prompt"
-  default_prompt: "Use $meme/mind-ur-own-business with a registered character."
