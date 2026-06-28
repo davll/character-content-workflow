@@ -101,8 +101,8 @@ SLR guidance should emphasize:
 
 - Larger body.
 - Prominent prism hump.
-- Right-hand grip.
-- Left hand supporting the lens when shooting.
+- Chunky ergonomic handgrip.
+- One hand holding the grip while the other supports the lens when shooting.
 - Bulkier and heavier carrying posture.
 - More visible strap.
 

@@ -10,7 +10,7 @@ objects:
     visual_traits:
       - large black professional SLR body
       - prominent angular prism hump above the lens
-      - chunky right-hand grip
+      - chunky ergonomic handgrip
       - larger protruding lens than a compact rangefinder
       - broad, heavier body silhouette
     accessories:
@@ -21,15 +21,14 @@ objects:
         - strap hangs visibly from the neck, shoulder, or hand
         - carried lower or closer to the torso because it looks heavier than a compact rangefinder
       shooting:
-        - right hand grips the chunky handgrip
-        - left hand supports the lens from underneath
+        - one hand holds the chunky handgrip while the other supports the lens from underneath
         - viewfinder is held directly to one eye behind the prominent prism hump
         - elbows spread slightly more than with a compact rangefinder
       around_neck:
         - hangs lower and bulkier from a visible black strap
         - camera body protrudes farther from the torso than a rangefinder
     constraints:
-      - Include the prominent prism hump and chunky right-hand grip when the camera is visible.
+      - Include the prominent prism hump and chunky ergonomic handgrip when the camera is visible.
     reference_images:
       - id: body
         path: references/cameras/nikon_f4-body.jpg
