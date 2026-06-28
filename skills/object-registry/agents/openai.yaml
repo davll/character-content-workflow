@@ -1,0 +1,4 @@
+interface:
+  display_name: "Object Registry"
+  short_description: "Query and validate registered props and object references."
+  default_prompt: "Validate the object registry and inspect available props."

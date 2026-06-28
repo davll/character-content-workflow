@@ -1,0 +1,41 @@
+objects:
+  nikon_f4:
+    names:
+      - Nikon F4
+      - ニコンF4
+      - Nikon 35mm SLR
+    category: camera
+    subtype: 35mm SLR
+    summary: Large black professional 35mm SLR camera with a prism hump, chunky grip, and larger lens.
+    visual_traits:
+      - large black professional SLR body
+      - prominent angular prism hump above the lens
+      - chunky right-hand grip
+      - larger protruding lens than a compact rangefinder
+      - broad, heavier body silhouette
+    accessories:
+      - black camera strap
+    usage_profiles:
+      carrying:
+        - supported more solidly with one hand under the body or lens
+        - strap hangs visibly from the neck, shoulder, or hand
+        - carried lower or closer to the torso because it looks heavier than a compact rangefinder
+      shooting:
+        - right hand grips the chunky handgrip
+        - left hand supports the lens from underneath
+        - viewfinder is held directly to one eye behind the prominent prism hump
+        - elbows spread slightly more than with a compact rangefinder
+      around_neck:
+        - hangs lower and bulkier from a visible black strap
+        - camera body protrudes farther from the torso than a rangefinder
+    constraints:
+      - Include the prominent prism hump and chunky right-hand grip when the camera is visible.
+    reference_images:
+      - id: body
+        path: references/cameras/nikon_f4-body.jpg
+        role: object_design
+        prompt_usage: Use only for Nikon F4 body shape, black SLR silhouette, prism hump, chunky grip, lens scale, strap lug placement, and professional camera bulk.
+      - id: top
+        path: references/cameras/nikon_f4-top.jpg
+        role: object_design
+        prompt_usage: Use only for Nikon F4 top-plate proportions, prism-hump shape, control layout, hot shoe placement, and professional SLR body depth.

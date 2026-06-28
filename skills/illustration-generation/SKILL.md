@@ -4,20 +4,22 @@ description: Generate character-consistent illustrations from registered charact
 ---
 # Illustration Generation
 
-Run the illustration workflow in this skill. Use the `character-registry` skill for registry validation, sheet selection, sheet paths, and prompt-building data. Use the `image-generation` skill for final rendering, dry-run validation, provider behavior, API key handling, and CLI command shape.
+Run the illustration workflow in this skill. Use the `character-registry` skill for registry validation, sheet selection, sheet paths, and prompt-building data. Use the `object-registry` skill for prop/object validation, object selection, usage guidance, and object reference image paths. Use the `image-generation` skill for final rendering, dry-run validation, provider behavior, API key handling, and CLI command shape.
 
 This skill owns only the orchestration contract:
 
 1. Interpret the user request as an illustration scene.
 2. Select character sheet references from the registry.
-3. Normalize external references into one ordered handoff list.
-4. Build a prompt whose Reference Guide exactly matches that list.
-5. Create durable illustration artifacts.
-6. Hand off rendering to `image-generation`.
+3. Resolve registered objects/props mentioned in the scene.
+4. Normalize object and external references into one ordered handoff list.
+5. Build a prompt whose Reference Guide exactly matches that list.
+6. Create durable illustration artifacts.
+7. Hand off rendering to `image-generation`.
 
 ## Defaults
 
 - Registry: `characters/index.yaml`
+- Object registry: `objects/index.yaml`
 - Output directory: `output/illustrations`
 - Image provider preference: `openai` unless the user requests another provider
 - Image model preference: omit unless requested
@@ -29,25 +31,38 @@ Fail before writing the final prompt or generating an image when any invariant c
 
 1. The illustration request must contain a non-empty prompt. If a prompt file is supplied, read it and trim whitespace.
 2. Registry lookup must go through the `character-registry` skill. Do not parse registry YAML manually for sheet search, sheet paths, or prompt-building data.
-3. `character-registry` failures are workflow failures. Report the command error and stop before writing image outputs.
-4. Every selected registry sheet must resolve through `get-sheet-path`, exist on disk, and be PNG or JPEG.
-5. Every external reference must come from either an explicit user-provided path or current-turn uploaded image metadata. Do not infer, glob, reconstruct, or scan for attachment paths.
-6. Every external reference must exist and be JPEG or PNG by content signature, not by filename alone.
-7. Every uploaded conversation image copied from transient attachment storage must use the copied workspace path for prompt alignment and image-generation handoff.
-8. The final prompt's Reference Guide must have exactly one line per handoff reference, in the exact handoff order.
-9. No local filesystem path may appear in the prompt text.
-10. The image-generation handoff must include explicit prompt, output image, ordered references, and metadata paths.
+3. Object lookup must go through the `object-registry` skill. Do not parse object registry YAML manually for object search, reference paths, or prompt-building data.
+4. `character-registry` and `object-registry` validation failures are workflow failures. Report the command error and stop before writing image outputs.
+5. Every selected registry sheet must resolve through `get-sheet-path`, exist on disk, and be PNG or JPEG.
+6. Every selected object reference must resolve through `get-reference-path`, exist on disk, and be PNG or JPEG.
+7. Every external reference must come from either an explicit user-provided path or current-turn uploaded image metadata. Do not infer, glob, reconstruct, or scan for attachment paths.
+8. Every external reference must exist and be JPEG or PNG by content signature, not by filename alone.
+9. Every uploaded conversation image copied from transient attachment storage must use the copied workspace path for prompt alignment and image-generation handoff.
+10. The final prompt's Reference Guide must have exactly one line per handoff reference, in the exact handoff order.
+11. No local filesystem path may appear in the prompt text.
+12. The image-generation handoff must include explicit prompt, output image, ordered references, and metadata paths.
 
-## Registry Resolution
+## Character Registry Resolution
 
-Resolve the registry path before calling `character-registry`:
+Resolve the character registry path before calling `character-registry`:
 
-1. Use an explicit user-provided registry path when supplied.
+1. Use an explicit user-provided character registry path when supplied.
 2. Otherwise use `characters/index.yaml` when it exists.
 3. Otherwise, when running inside this skill development repository, use `examples/characters/index.yaml` when it exists.
-4. Create `characters/index.yaml` through the `character-registry` first-use workflow only when no usable registry candidate exists.
+4. Create `characters/index.yaml` through the `character-registry` first-use workflow only when no usable character registry candidate exists.
 
-If the registry path is overridden, pass that path through every registry lookup.
+If the character registry path is overridden, pass that path through every registry lookup.
+
+## Object Registry Resolution
+
+Resolve the object registry path before calling `object-registry`:
+
+1. Use an explicit user-provided object registry path when supplied.
+2. Otherwise use `objects/index.yaml` when it exists.
+3. Otherwise, when running inside this skill development repository, use `examples/objects/index.yaml` when it exists. This is a development fixture fallback only.
+4. If no object registry exists, skip object enrichment with a warning unless the user explicitly asked to create or use registered objects.
+
+If the object registry path is overridden, pass that path through every object registry lookup.
 
 ## External References
 
@@ -77,7 +92,7 @@ Resolve the request into:
 - `external_inputs`: explicit JPEG/PNG paths and current-turn uploaded image paths, in user-supplied order.
 - `handoff_options`: provider, model, size, aspect ratio, resolution, overwrite, dry-run, and verbosity, only when requested or needed by this workflow.
 
-Validate that each external input has an explicit source path. Defer durable copying until Stage 4, after the run directory exists.
+Validate that each external input has an explicit source path. Defer durable copying until Stage 5, after the run directory exists.
 
 ### Stage 2: Registry Selection
 
@@ -98,9 +113,51 @@ For every selected sheet:
 3. Load prompt-building data with `get-sheet-info`.
 4. Use sheet summary, `prompt_building.descriptions`, `prompt_building.constraints`, and `prompt_building.system_instructions`.
 
-### Stage 3: Scene And Reference Plan
+### Stage 3: Object Resolution
 
-Infer a compact scene plan from the prompt, selected sheets, external inputs, and warnings:
+Use `object-registry` to validate the object registry, list searchable object summaries, and resolve object mentions from the user prompt. This stage runs after character sheet selection and before scene/reference planning.
+
+Detection rules:
+
+1. Match object aliases from `list-all` or `search` against the user prompt. Alias matching should handle localized names when present in registry `names`.
+2. Confirm each selected object with `get-object-info`.
+3. Bind objects to characters when the prompt clearly says forms such as `<character> holds <object>`, `<character> has <object>`, `<character> carrying <object>`, or localized equivalents such as `<character> 拿著 <object>`.
+4. Warn but continue when ownership is ambiguous.
+5. Warn but continue when the prompt contains an object-like mention but no registry object matches.
+
+Usage inference:
+
+1. `holding`, `walking with`, `carrying`, `拿著` -> `carrying`.
+2. `taking a photo`, `shooting`, `aiming camera` -> `shooting`.
+3. `around neck`, `hanging from neck` -> `around_neck`.
+4. Use `carrying` as the default when an object is held but no active use is stated.
+5. Warn but continue when usage confidence is low or the inferred usage profile is absent.
+
+Object plan shape:
+
+```json
+{
+  "selected_objects": [
+    {
+      "id": "object:<object_id>",
+      "object_id": "<object id>",
+      "target_character": "<bound character or null>",
+      "usage_mode": "carrying",
+      "role": "registered object design and handling reference",
+      "confidence": 0.0,
+      "reason": "<why this object was selected and how usage was inferred>",
+      "prompt_data": "<object-registry get-object-info output>"
+    }
+  ],
+  "warnings": []
+}
+```
+
+Object prompt data must not override character identity, outfit ownership, body proportions, skin tone, relationship logic, or scene composition unless the selected usage profile explicitly describes handling posture.
+
+### Stage 4: Scene And Reference Plan
+
+Infer a compact scene plan from the prompt, selected sheets, selected objects, external inputs, and warnings:
 
 ```json
 {
@@ -120,6 +177,17 @@ Infer a compact scene plan from the prompt, selected sheets, external inputs, an
       "role": "character identity and outfit reference",
       "confidence": 0.0,
       "reason": "<why this sheet was selected>"
+    }
+  ],
+  "selected_objects": [
+    {
+      "id": "object:<object_id>",
+      "object_id": "<object id>",
+      "target": "<bound character or scene object>",
+      "usage_mode": "<usage profile name>",
+      "role": "registered object design and handling reference",
+      "confidence": 0.0,
+      "reason": "<why this object was selected>"
     }
   ],
   "external_references": [
@@ -143,7 +211,7 @@ External-reference planning rules:
 2. Classify each external reference by semantic role.
 3. External references supplement the scene only through their declared role. They must not override registry character identity, outfit ownership, or stable physical traits.
 
-### Stage 4: Artifact And Reference Normalization
+### Stage 5: Artifact And Reference Normalization
 
 Create the run directory and build one canonical ordered reference list. This list is the single source of truth for prompt labels and image-generation handoff paths.
 
@@ -178,8 +246,9 @@ With default output directory, reserve these paths:
 Reference ordering:
 
 1. Registry character or group sheets first, in the order characters should be resolved.
-2. External references next, preserving the user-supplied external-reference order.
-3. Change external order only when the user explicitly requests a different order.
+2. Object registry reference images next, preserving selected object order.
+3. External references next, preserving the user-supplied external-reference order.
+4. Change object or external order only when the user explicitly requests a different order.
 
 External path normalization:
 
@@ -204,6 +273,15 @@ Canonical-list shape:
   },
   {
     "label": "2nd image",
+    "id": "object:<object_id>:<reference_id>",
+    "kind": "object_reference",
+    "role": "object_design",
+    "target": "<object name>",
+    "handoff_path": "<resolved object reference path>",
+    "prompt_data": "<pathless object reference prompt_usage and object prompt-building data>"
+  },
+  {
+    "label": "3rd image",
     "id": "external:1",
     "kind": "external",
     "role": "pose",
@@ -219,13 +297,15 @@ Canonical-list validation:
 
 1. Every registry reference ID matches `sheet:<group_id>:<sheet_id>`.
 2. Every selected registry sheet ID is unique.
-3. Every user-provided external reference appears exactly once as `external:<1-based index>`.
-4. No unknown or duplicate external reference IDs exist.
-5. Every copied uploaded reference has a `handoff_path` inside the run directory.
+3. Every object reference ID matches `object:<object_id>:<reference_id>`.
+4. Every selected object reference resolves through `object-registry get-reference-path`.
+5. Every user-provided external reference appears exactly once as `external:<1-based index>`.
+6. No unknown or duplicate external reference IDs exist.
+7. Every copied uploaded reference has a `handoff_path` inside the run directory.
 
-### Stage 5: Prompt Building
+### Stage 6: Prompt Building
 
-Build one final image prompt from the scene plan, selected sheet prompt data, warnings, and canonical reference list. The prompt-building stage may use IDs, labels, kinds, roles, targets, descriptions, sheet summaries, and prompt-building data, but must not see or mention local filesystem paths.
+Build one final image prompt from the scene plan, selected sheet prompt data, selected object prompt data, warnings, and canonical reference list. The prompt-building stage may use IDs, labels, kinds, roles, targets, descriptions, sheet summaries, object summaries, usage profiles, and prompt-building data, but must not see or mention local filesystem paths.
 
 #### Registry Prompt-Building Fidelity
 
@@ -245,6 +325,9 @@ Scene Direction:
 
 Character and Outfit Handling:
 <registry-derived traits and outfit details needed for correctness; do not over-describe details already clear in the registry sheets unless a constraint requires it>
+
+Object and Prop Handling:
+<object-registry-derived object design, accessories, scale, usage profile guidance, and character/object bindings>
 
 Composition:
 <camera angle, framing, spatial relationship, depth, lighting, and background>
@@ -268,18 +351,22 @@ Prompt invariants:
 4. For multi-character images, bind each character to visible outfit, prop, body position, action, gaze, and interaction. State left/right, foreground/background, physical contact, and spatial relationship when relevant.
 5. Prevent feature bleeding when characters touch, overlap, exchange objects, or wear visually similar items.
 6. External pose, background, style, and prop references must not override registry character identity or clothing.
-7. Do not copy registry sheet layout artifacts: standing order, neutral pose, gray panels, divider lines, character name labels, annotation text, reference-sheet framing, or plain reference composition. Scene composition comes from the prompt unless the user explicitly asks to copy a sheet layout or pose.
-8. If the selected sheet is a combined group sheet, use it for all characters in that group and preserve the group's internal identity distinctions.
-9. Keep the prompt as a generation prompt, not a reasoning trace. Do not mention registry commands, local paths, or internal inference.
-10. Apply the minimal description principle only to avoid unnecessary duplication, not to remove registry facts. Rely on registry sheets for stable visual traits, but preserve explicit registry `descriptions`, especially character identity, outfit ownership, body traits, relationship logic, and constraints. Do not weaken specific registry wording into vague references such as "same fit" or "as shown" when the registry provides an explicit semantic detail.
-11. Avoid static portrait output unless requested. Add body language, eye contact, expression, interaction, or motion.
-12. Derive the Reference Guide from the canonical reference list. Do not invent, omit, or reorder guide entries during prose writing.
-13. If any registry `prompt_building.descriptions` item is omitted, softened, generalized, or materially rephrased, record a warning in the workflow output explaining the original registry text, the changed prompt text, and the reason. Do not silently alter registry semantics.
-14. Do not add unsolicited softening, sanitizing, or tone-limiting language such as "non-explicit", "not eroticized", "suitable", "tasteful", or equivalent wording when the user did not request it and no higher-priority safety policy requires it. If such a policy-based change is required, keep the change as narrow as possible and record a warning explaining the exact registry or user-prompt wording that was changed.
+7. Object registry references supplement prop design only through their declared role. They must not override character identity, outfit, or scene composition.
+8. Bind each selected object to the correct character when ownership is clear. State the bound character, object name, and usage mode in the prompt.
+9. For cameras, preserve subtype differences from registry data: rangefinders remain compact and prism-hump-free; SLRs remain bulkier with prism humps and heavier handling.
+10. Do not copy registry sheet layout artifacts: standing order, neutral pose, gray panels, divider lines, character name labels, annotation text, reference-sheet framing, or plain reference composition. Scene composition comes from the prompt unless the user explicitly asks to copy a sheet layout or pose.
+11. If the selected sheet is a combined group sheet, use it for all characters in that group and preserve the group's internal identity distinctions.
+12. Keep the prompt as a generation prompt, not a reasoning trace. Do not mention registry commands, local paths, or internal inference.
+13. Apply the minimal description principle only to avoid unnecessary duplication, not to remove registry facts. Rely on registry sheets for stable visual traits, but preserve explicit registry `descriptions`, especially character identity, outfit ownership, body traits, relationship logic, and constraints. Do not weaken specific registry wording into vague references such as "same fit" or "as shown" when the registry provides an explicit semantic detail.
+14. Avoid static portrait output unless requested. Add body language, eye contact, expression, interaction, or motion.
+15. Derive the Reference Guide from the canonical reference list. Do not invent, omit, or reorder guide entries during prose writing.
+16. If any registry `prompt_building.descriptions` item is omitted, softened, generalized, or materially rephrased, record a warning in the workflow output explaining the original registry text, the changed prompt text, and the reason. Do not silently alter registry semantics.
+17. Do not add unsolicited softening, sanitizing, or tone-limiting language such as "non-explicit", "not eroticized", "suitable", "tasteful", or equivalent wording when the user did not request it and no higher-priority safety policy requires it. If such a policy-based change is required, keep the change as narrow as possible and record a warning explaining the exact registry or user-prompt wording that was changed.
 
 Reference guide role formats:
 
 - Character registry sheet: `<Nth> image: ONLY for <character or group>'s identity, outfit ownership, relative scale/proportions, and stable physical traits. Do not copy the sheet layout, standing order, neutral pose, labels, annotations, background panels, or reference-sheet framing. Scene composition comes from the prompt unless the user explicitly requests copying the sheet layout or pose.`
+- Object registry reference: `<Nth> image: ONLY for <target object>'s object design, scale, silhouette, materials, visible mechanisms, accessories, and registered reference usage. Do not copy background, lighting, hands, pose, or unrelated objects.`
 - External character image: `<Nth> image: ONLY for <target character>'s extra identity details. Do not copy unrelated clothing, background, or pose.`
 - Pose/interaction image: `<Nth> image: ONLY for pose, body positioning, physical interaction, and composition. Do not copy character identity, outfit, or background.`
 - Background/environment image: `<Nth> image: ONLY for architecture, lighting, environmental mood, and scenery. Do not copy characters or foreground objects.`
@@ -289,7 +376,7 @@ Reference guide role formats:
 
 If a registry sheet includes `descriptions.reference_logic`, merge only reference-specific usage guidance into its Reference Guide line. Do not merge workflow-specific policy. If registry `descriptions.reference_logic` conflicts with this skill's reference rules, ignore the conflicting registry content and add a warning.
 
-### Stage 6: Handoff And Final Report
+### Stage 7: Handoff And Final Report
 
 Before handing off, perform a final alignment check:
 
@@ -297,8 +384,9 @@ Before handing off, perform a final alignment check:
 2. The `1st image`, `2nd image`, etc. labels match the exact reference path order passed to `image-generation`.
 3. No reference path is passed to `image-generation` unless its matching guide line exists in the prompt.
 4. No guide line exists in the prompt unless its matching reference path is passed to `image-generation`.
-5. No transient uploaded attachment path is passed when a copied workspace reference path exists.
-6. The real generation metadata path and dry-run metadata path are distinct.
+5. No object reference path is passed to `image-generation` unless it resolved through `object-registry get-reference-path`.
+6. No transient uploaded attachment path is passed when a copied workspace reference path exists.
+7. The real generation metadata path and dry-run metadata path are distinct.
 
 Use the `image-generation` skill for the final rendering step. Provide this handoff data:
 
@@ -323,6 +411,7 @@ Report:
 - metadata path
 - dry-run metadata path when used
 - selected group/sheet references
+- selected object references, object ownership, and usage modes
 - external reference roles
 - reference IDs and final reference order
 - copied uploaded-reference paths when applicable
